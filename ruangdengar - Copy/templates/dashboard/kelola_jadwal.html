@@ -1,0 +1,675 @@
+{% extends 'base.html' %} {% block title %}Kelola Jadwal Konseling{% endblock %}
+{% block content %}
+<style>
+  body {
+    font-family: "Inter", sans-serif;
+    background-color: #f4f5f7;
+    margin: 0;
+  }
+  .container-jadwal {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+    padding: 25px 30px;
+    margin-top: 10px;
+  }
+  .header-jadwal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+  }
+  .header-jadwal h2 {
+    color: #1f2937;
+    font-size: 25px;
+    font-weight: 700;
+  }
+  .btn-tambah {
+    background: #5a509b;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: 500;
+    margin-left: 20px;
+  }
+  .btn-tambah:hover {
+    background: #473d8c;
+  }
+  .filter-section {
+    margin-bottom: 30px;
+    padding: 20px 25px;
+    background: #fdfdff;
+    border-radius: 12px;
+    border: 2px solid #e0e0f0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+  }
+  .filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e9e9f4;
+  }
+  .filter-header h3 {
+    color: #5a509b;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-end;
+  }
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+  }
+  .filter-group label {
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+  .filter-group input[type="date"],
+  .filter-group select {
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    min-width: 100%;
+    box-sizing: border-box;
+    height: 40px;
+  }
+  .filter-group input[type="date"]:focus,
+  .filter-group select:focus {
+    border-color: #5a509b;
+    outline: none;
+  }
+  .btn-filter,
+  .btn-reset {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 40px;
+    white-space: nowrap;
+  }
+  .btn-filter {
+    background: #5a509b;
+    color: #fff;
+  }
+  .btn-filter:hover {
+    background: #473d8c;
+  }
+  .btn-reset {
+    background: #f0f0f0;
+    color: #555;
+  }
+  .btn-reset:hover {
+    background: #e0e0e0;
+  }
+  .table-header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-top: 10px;
+  }
+  .search-bar {
+    position: relative;
+  }
+  .search-bar input[type="text"] {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    width: 250px;
+    padding-left: 35px;
+  }
+  .search-bar::before {
+    content: "🔍";
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    pointer-events: none;
+  }
+  .table-jadwal-container {
+    margin-top: 10px;
+  }
+  .table-jadwal {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .table-jadwal th,
+  .table-jadwal td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+  }
+  .table-jadwal th {
+    background: #f2f0ff;
+    color: #5a509b;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .table-jadwal td {
+    background: #fff;
+    color: #444;
+    font-size: 14px;
+  }
+  .table-jadwal th:nth-child(5),
+  .table-jadwal td:nth-child(5) {
+    width: 18%;
+  }
+  .table-jadwal th:nth-child(6),
+  .table-jadwal td:nth-child(6) {
+    width: 18%;
+  }
+  .table-jadwal th:nth-child(7),
+  .table-jadwal td:nth-child(7) {
+    width: 12%;
+  }
+  .status-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .status-terjadwal {
+    background: #e6f3ff;
+    color: #1e88e5;
+  }
+  .status-dibatalkan {
+    background: #ffebee;
+    color: #d32f2f;
+  }
+  .status-selesai {
+    background: #e8f5e9;
+    color: #388e3c;
+  }
+  .action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    margin: 0 3px;
+    border-radius: 6px;
+    transition: 0.2s;
+  }
+  .action-btn.edit {
+    color: #5a509b;
+  }
+  .action-btn.delete {
+    color: #c62828;
+  }
+  .action-btn:hover {
+    background-color: #f2f0ff;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto;
+  }
+  .modal-content {
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    width: 380px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    animation: fadeIn 0.3s ease-out;
+  }
+  .modal-content-edit {
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    width: 700px;
+    max-width: 95%;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    animation: fadeIn 0.3s ease-out;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 30px;
+    margin-bottom: 20px;
+  }
+  .form-group {
+    margin-bottom: 0;
+    text-align: left;
+  }
+  .form-group.full-width {
+    grid-column: 1 / -1;
+  }
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #444;
+    font-size: 14px;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 14px;
+  }
+  .form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+  .form-actions-edit {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 30px;
+  }
+  .btn-batal,
+  .btn-simpan {
+    padding: 10px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    border: none;
+  }
+  .btn-batal {
+    background: none;
+    color: #555;
+  }
+  .btn-simpan {
+    background: #5a509b;
+    color: #fff;
+  }
+  .btn-simpan:hover {
+    background: #473d8c;
+  }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<div class="container-jadwal">
+  <div class="header-jadwal">
+    <h2>Kelola Jadwal Konseling</h2>
+  </div>
+
+  <div class="filter-section">
+    <div class="filter-header">
+      <h3>🔎 Filter Jadwal</h3>
+      <button class="btn-tambah" onclick="showAddModal()">
+        ➕ Tambah Jadwal
+      </button>
+    </div>
+    <div class="filter-options">
+      <div class="filter-group">
+        <label>Dari Tanggal</label><input type="date" id="tanggalDari" />
+      </div>
+      <div class="filter-group">
+        <label>Sampai Tanggal</label><input type="date" id="tanggalSampai" />
+      </div>
+      <div class="filter-group">
+        <label>Konselor</label
+        ><select id="konselor" disabled>
+          <option>Dr. Indah Permata</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Jenis</label
+        ><select id="jenisKonselingFilter">
+          <option value="semua">Semua Jenis</option>
+          <option value="Kesehatan Mental">Kesehatan Mental</option>
+          <option value="Akademik & Studi">Akademik & Studi</option>
+          <option value="Hubungan Interpersonal">Hubungan Interpersonal</option>
+          <option value="Kekerasan & Pelecehan">Kekerasan & Pelecehan</option>
+          <option value="Karier & Pengembangan Diri">
+            Karier & Pengembangan Diri
+          </option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Status</label
+        ><select id="status">
+          <option value="semua">Semua Status</option>
+          <option value="Terjadwal">Terjadwal</option>
+          <option value="Dibatalkan">Dibatalkan</option>
+          <option value="Selesai">Selesai</option>
+        </select>
+      </div>
+      <button class="btn-filter" onclick="applyFilter()">
+        Terapkan Filter
+      </button>
+      <button class="btn-reset" onclick="resetFilter()">Reset</button>
+    </div>
+  </div>
+
+  <div class="table-jadwal-container">
+    <div class="table-header-controls">
+      <div>
+        <h3>Daftar Jadwal Konseling</h3>
+        <p style="font-size: 13px; color: #777">
+          Lihat, edit, atau hapus jadwal sesi konseling yang akan datang.
+        </p>
+      </div>
+      <div class="search-bar">
+        <input
+          type="text"
+          id="searchInput"
+          onkeyup="searchTable()"
+          placeholder="Cari Klien/Topik..."
+        />
+      </div>
+    </div>
+
+    <table class="table-jadwal" id="jadwalTable">
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Waktu</th>
+          <th>Konselor</th>
+          <th>Klien</th>
+          <th>Topik</th>
+          <th>Jenis</th>
+          <th>Status</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Add/Edit -->
+<div id="editModal" class="modal">
+  <div class="modal-content-edit">
+    <h3 id="modalTitle">Detail Konseling</h3>
+    <p class="subtitle" id="modalSubtitle">
+      Sesuaikan detail untuk janji temu konseling ini.
+    </p>
+    <form id="editForm">
+      <input type="hidden" id="editId" name="id" />
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Tanggal</label><input type="date" id="editTanggal" required />
+        </div>
+        <div class="form-group">
+          <label>Waktu</label
+          ><input
+            type="text"
+            id="editWaktuDisplay"
+            placeholder="HH:MM - HH:MM"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label>Konselor</label
+          ><select id="editKonselor" disabled>
+            <option>Dr. Indah Permata</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Klien</label
+          ><select id="editKlien"></select>
+        </div>
+        <div class="form-group full-width">
+          <label>Topik Konseling</label
+          ><textarea id="editTopik" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Status</label
+          ><select id="editStatus">
+            <option>Terjadwal</option>
+            <option>Dibatalkan</option>
+            <option>Selesai</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Jenis Konseling</label
+          ><select id="editJenis">
+            <option>Kesehatan Mental</option>
+            <option>Akademik & Studi</option>
+            <option>Hubungan Interpersonal</option>
+            <option>Kekerasan & Pelecehan</option>
+            <option>Karier & Pengembangan Diri</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions-edit">
+        <button type="button" class="btn-batal" onclick="closeEditModal()">
+          Batal
+        </button>
+        <button type="submit" class="btn-simpan">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Delete -->
+<div id="deleteModal" class="modal">
+  <div class="modal-content">
+    <h3>Konfirmasi Hapus</h3>
+    <p id="deleteText">Apakah Anda yakin ingin menghapus jadwal ini?</p>
+    <div
+      class="modal-actions"
+      style="
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+      "
+    >
+      <button class="btn-batal" onclick="closeDeleteModal()">Batal</button>
+      <button class="btn-simpan" id="confirmDeleteBtn">Hapus</button>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  let schedules = [
+    {
+      id: 1,
+      tanggal: "2025-11-10",
+      waktu: "10:00 - 10:30",
+      konselor: "Dr. Indah Permata",
+      klien: "Dwi Prasetyo",
+      topik: "Stress Akademik",
+      jenis: "Akademik & Studi",
+      status: "Terjadwal",
+    },
+    {
+      id: 2,
+      tanggal: "2025-11-12",
+      waktu: "14:00 - 14:30",
+      konselor: "Dr. Indah Permata",
+      klien: "Citra Dewi",
+      topik: "Konseling Karier",
+      jenis: "Karier & Pengembangan Diri",
+      status: "Selesai",
+    },
+  ];
+  let nextId = 3;
+  const mockClients = [
+    "Dwi Prasetyo",
+    "Citra Dewi",
+    "Joko Susilo",
+    "Marita Fransiska",
+    "Agus Setiawan",
+    "Siti Aminah",
+    "Budi Santoso",
+  ];
+
+  function renderTable() {
+    const tbody = document.querySelector("#jadwalTable tbody");
+    tbody.innerHTML = "";
+    schedules.forEach((s) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${s.tanggal}</td><td>${s.waktu}</td><td>${
+        s.konselor
+      }</td><td>${s.klien}</td><td>${s.topik}</td><td>${
+        s.jenis
+      }</td><td><span class="status-tag ${
+        s.status == "Terjadwal"
+          ? "status-terjadwal"
+          : s.status == "Selesai"
+          ? "status-selesai"
+          : "status-dibatalkan"
+      }">${s.status}</span></td><td>
+      <button class="action-btn edit" onclick="showEditModal(${
+        s.id
+      })">✏️</button>
+      <button class="action-btn delete" onclick="showDeleteModal(${
+        s.id
+      })">🗑️</button>
+    </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function showAddModal() {
+    document.getElementById("modalTitle").textContent =
+      "➕ Tambah Jadwal Sesi Baru";
+    document.getElementById("modalSubtitle").textContent =
+      "Isi detail janji temu konseling yang baru.";
+    document.getElementById("editId").value = "";
+    document.getElementById("editTanggal").value = "";
+    document.getElementById("editWaktuDisplay").value = "10:30 - 11:00";
+    document.getElementById("editTopik").value = "";
+    document.getElementById("editStatus").value = "Terjadwal";
+    document.getElementById("editJenis").value = "Kesehatan Mental";
+    const klienSelect = document.getElementById("editKlien");
+    klienSelect.innerHTML = "";
+    mockClients.sort().forEach((k) => {
+      const o = document.createElement("option");
+      o.value = o.textContent = k;
+      klienSelect.appendChild(o);
+    });
+    klienSelect.value = mockClients[0];
+    document.getElementById("editModal").style.display = "flex";
+  }
+
+  function showEditModal(id) {
+    const s = schedules.find((x) => x.id === id);
+    if (!s) return;
+    document.getElementById("modalTitle").textContent = "✏️ Edit Jadwal Sesi";
+    document.getElementById("modalSubtitle").textContent =
+      "Ubah detail jadwal konseling.";
+    document.getElementById("editId").value = s.id;
+    document.getElementById("editTanggal").value = s.tanggal;
+    document.getElementById("editWaktuDisplay").value = s.waktu;
+    document.getElementById("editTopik").value = s.topik;
+    document.getElementById("editStatus").value = s.status;
+    document.getElementById("editJenis").value = s.jenis;
+    const klienSelect = document.getElementById("editKlien");
+    klienSelect.innerHTML = "";
+    mockClients.sort().forEach((k) => {
+      const o = document.createElement("option");
+      o.value = o.textContent = k;
+      klienSelect.appendChild(o);
+    });
+    klienSelect.value = s.klien;
+    document.getElementById("editModal").style.display = "flex";
+  }
+
+  function closeEditModal() {
+    document.getElementById("editModal").style.display = "none";
+  }
+  function showDeleteModal(id) {
+    scheduleToDeleteId = id;
+    document.getElementById("deleteModal").style.display = "flex";
+  }
+  function closeDeleteModal() {
+    document.getElementById("deleteModal").style.display = "none";
+  }
+
+  document.getElementById("editForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const id = document.getElementById("editId").value;
+    const newData = {
+      tanggal: document.getElementById("editTanggal").value,
+      waktu: document.getElementById("editWaktuDisplay").value,
+      konselor: "Dr. Indah Permata",
+      klien: document.getElementById("editKlien").value,
+      topik: document.getElementById("editTopik").value,
+      status: document.getElementById("editStatus").value,
+      jenis: document.getElementById("editJenis").value,
+    };
+    if (id) {
+      const index = schedules.findIndex((s) => s.id == id);
+      schedules[index] = { ...schedules[index], ...newData };
+    } else {
+      schedules.push({ id: nextId++, ...newData });
+    }
+    renderTable();
+    closeEditModal();
+  });
+
+  document
+    .getElementById("confirmDeleteBtn")
+    .addEventListener("click", function () {
+      schedules = schedules.filter((s) => s.id !== scheduleToDeleteId);
+      renderTable();
+      closeDeleteModal();
+    });
+
+  function searchTable() {
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const trs = document.querySelectorAll("#jadwalTable tbody tr");
+    trs.forEach((tr) => {
+      tr.style.display = Array.from(tr.cells).some((td) =>
+        td.textContent.toLowerCase().includes(input)
+      )
+        ? ""
+        : "none";
+    });
+  }
+
+  function applyFilter() {
+    alert("Fitur filter bisa dikodekan sesuai backend.");
+  }
+  function resetFilter() {
+    document.getElementById("tanggalDari").value = "";
+    document.getElementById("tanggalSampai").value = "";
+    document.getElementById("konselor").value = "Dr. Indah Permata";
+    document.getElementById("jenisKonselingFilter").value = "semua";
+    document.getElementById("status").value = "semua";
+    applyFilter();
+  }
+
+  renderTable();
+</script>
+{% endblock %}

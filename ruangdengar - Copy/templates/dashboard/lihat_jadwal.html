@@ -1,0 +1,472 @@
+{% extends 'base.html' %}
+
+{% block title %}lihat-jadwal{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary-color: #5d55f3; /* Ungu Utama */
+    --active-bg: #eae8ff;
+    --sidebar-width: 250px;
+    --light-bg: #f4f7f6; /* Latar belakang halaman */
+    --white: #ffffff;
+    --text-dark: #333;
+    --text-light: #777;
+    --border-color: #e0e0e0;
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    --sidebar-text-color: #4a5568;
+  }
+
+  /* Catatan: Styling global seperti body, app-container, sidebar, header, dan footer
+       seharusnya berada di base.html atau file CSS eksternal. 
+       Saya menyertakannya di sini agar kode ini tetap utuh dan dapat dicoba secara mandiri. */
+
+  /* --- LIHAT JADWAL SPECIFIC STYLING --- */
+  .content-wrapper {
+    padding: 30px;
+    flex-grow: 1;
+  }
+  .page-title {
+    font-size: 1.8em;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+  .card {
+    background-color: var(--white);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+  }
+
+  /* Detail Sesi */
+  .detail-card {
+    margin-bottom: 20px;
+  }
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 30px;
+    margin-bottom: 20px;
+    font-size: 0.95em;
+  }
+  .detail-grid p strong {
+    color: var(--text-dark);
+    font-weight: bold;
+    margin-right: 5px;
+  }
+
+  .catatan .title {
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  .note {
+    background-color: var(--light-bg);
+    padding: 15px;
+    border-left: 3px solid var(--primary-color);
+    border-radius: 4px;
+    font-style: italic;
+    color: var(--text-dark);
+  }
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  /* Button Styling */
+  .btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    border: 1px solid;
+    transition: background-color 0.2s;
+  }
+  /* Tombol Batalkan Sesi (ungu/primer) */
+  .btn.purple {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
+  }
+  .btn.purple:hover {
+    background-color: #4941d3;
+  }
+
+  /* Tabel Jadwal */
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  .table-header input {
+    padding: 8px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    width: 300px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  table th,
+  table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9em;
+  }
+  table th {
+    color: var(--text-light);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  /* Style baris yang dapat diklik */
+  table tbody tr {
+    cursor: pointer;
+  }
+  table tbody tr:hover {
+    background-color: #f0f4f7;
+  }
+  table tbody tr.selected {
+    background-color: var(--active-bg);
+    border-left: 4px solid var(--primary-color);
+  }
+
+  /* Status Badge Tabel Jadwal */
+  .status-badge-blue {
+    background-color: #4299e1;
+  } /* Terjadwal */
+  .status-badge-green {
+    background-color: #48bb78;
+  } /* Selesai */
+  .status-badge-red {
+    background-color: #f56565;
+  } /* Dibatalkan */
+  .status-badge-yellow {
+    background-color: #ffc107;
+  } /* Sedang Berlangsung */
+  .status-badge {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.75em;
+    font-weight: bold;
+    color: var(--white);
+    text-align: center;
+    display: inline-block;
+  }
+</style>
+
+<div class="content-wrapper">
+  <div id="lihat-jadwal-content" class="page-content active">
+    <h1 class="page-title">Lihat Jadwal Konseling</h1>
+
+    <section class="card detail-card">
+      <h3>Detail Sesi Konseling</h3>
+      <div id="detail-grid" class="detail-grid">
+        <p><strong>Tanggal:</strong> 2024-07-20</p>
+        <p><strong>Waktu:</strong> 10:00 AM</p>
+        <p><strong>Konselor:</strong> Dr. Sarah Cahyani</p>
+        <p><strong>Klien:</strong> Budi Santoso</p>
+        <p><strong>Topik:</strong> Manajemen Stres dan Kecemasan</p>
+        <p><strong>Durasi:</strong> 60 menit</p>
+        <p><strong>Jenis Konseling:</strong> Bullying</p>
+        <p id="detail-status-wrapper">
+          <strong>Status:</strong>
+          <span id="detail-status" class="status-badge status-badge-yellow"
+            >Berlangsung</span
+          >
+        </p>
+      </div>
+
+      <div class="catatan">
+        <p class="title">Catatan Sesi:</p>
+        <div id="detail-note" class="note">
+          Klien telah mengikuti 3 sesi sebelumnya. Memiliki riwayat kecemasan
+          ringan dan mencari teknik relaksasi yang efektif. Penting untuk
+          menindaklanjuti strategi coping yang didiskusikan dalam sesi terakhir.
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="cancel-session-btn" class="btn purple">
+          Batalkan Sesi
+        </button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="table-header">
+        <h3>Daftar Jadwal Konseling</h3>
+        <input type="text" placeholder="Cari jadwal..." />
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Waktu</th>
+            <th>Konselor</th>
+            <th>Klien</th>
+            <th>Topik</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="schedule-body">
+          <tr
+            id="session-1"
+            data-tanggal="2024-07-20"
+            data-waktu="10:00 AM"
+            data-konselor="Dr. Sarah Cahyani"
+            data-klien="Budi Santoso"
+            data-topik="Manajemen Stres dan Kecemasan"
+            data-durasi="60 menit"
+            data-jenis="Bullying"
+            data-status="Berlangsung"
+            data-note="Klien telah mengikuti 3 sesi sebelumnya. Memiliki riwayat kecemasan ringan dan mencari teknik relaksasi yang efektif. Penting untuk menindaklanjuti strategi coping yang didiskusikan dalam sesi terakhir."
+            data-badge-class="status-badge-yellow"
+            class="schedule-row selected"
+          >
+            <td>2024-07-20</td>
+            <td>10:00 AM</td>
+            <td>Dr. Sarah Cahyani</td>
+            <td>Budi Santoso</td>
+            <td>Manajemen Stres dan Kecemasan</td>
+            <td id="status-1">
+              <span class="status-badge status-badge-yellow">Berlangsung</span>
+            </td>
+          </tr>
+          <tr
+            id="session-2"
+            data-tanggal="2024-08-01"
+            data-waktu="10:00 AM"
+            data-konselor="Dr. Indah Permata"
+            data-klien="Dwi Prasetyo"
+            data-topik="Kecemasan Sosial"
+            data-durasi="60 menit"
+            data-jenis="Anxiety"
+            data-status="Terjadwal"
+            data-note="Klien baru, ini adalah sesi pertama. Fokus pada pengenalan teknik relaksasi dasar."
+            data-badge-class="status-badge-blue"
+            class="schedule-row"
+          >
+            <td>2024-08-01</td>
+            <td>10:00 AM</td>
+            <td>Dr. Indah Permata</td>
+            <td>Dwi Prasetyo</td>
+            <td>Kecemasan Sosial</td>
+            <td id="status-2">
+              <span class="status-badge status-badge-blue">Terjadwal</span>
+            </td>
+          </tr>
+          <tr
+            id="session-3"
+            data-tanggal="2024-08-01"
+            data-waktu="02:00 PM"
+            data-konselor="Bpk. Ahmad Santoso"
+            data-klien="Citra Dewi"
+            data-topik="Masalah Karir"
+            data-durasi="90 menit"
+            data-jenis="Career Coaching"
+            data-status="Terjadwal"
+            data-note="Diskusi mendalam mengenai transisi karir dan mencari arahan baru."
+            data-badge-class="status-badge-blue"
+            class="schedule-row"
+          >
+            <td>2024-08-01</td>
+            <td>02:00 PM</td>
+            <td>Bpk. Ahmad Santoso</td>
+            <td>Citra Dewi</td>
+            <td>Masalah Karir</td>
+            <td id="status-3">
+              <span class="status-badge status-badge-blue">Terjadwal</span>
+            </td>
+          </tr>
+          <tr
+            id="session-4"
+            data-tanggal="2024-07-30"
+            data-waktu="11:00 AM"
+            data-konselor="Dr. Indah Permata"
+            data-klien="Joko Susilo"
+            data-topik="Stres Kuliah"
+            data-durasi="60 menit"
+            data-jenis="Academic Stress"
+            data-status="Selesai"
+            data-note="Sesi penutup. Klien menunjukkan peningkatan signifikan dalam manajemen waktu dan stres. Disarankan untuk tindak lanjut 3 bulan lagi."
+            data-badge-class="status-badge-green"
+            class="schedule-row"
+          >
+            <td>2024-07-30</td>
+            <td>11:00 AM</td>
+            <td>Dr. Indah Permata</td>
+            <td>Joko Susilo</td>
+            <td>Stres Kuliah</td>
+            <td id="status-4">
+              <span class="status-badge status-badge-green">Selesai</span>
+            </td>
+          </tr>
+          <tr
+            id="session-5"
+            data-tanggal="2024-07-29"
+            data-waktu="03:00 PM"
+            data-konselor="Ibu Rina Wijaya"
+            data-klien="Maria Fransiska"
+            data-topik="Kekerasan Seksual"
+            data-durasi="60 menit"
+            data-jenis="Trauma"
+            data-status="Dibatalkan"
+            data-note="Klien membatalkan sesi 1 jam sebelum jadwal. Konselor telah mengirimkan email tindak lanjut untuk sesi berikutnya."
+            data-badge-class="status-badge-red"
+            class="schedule-row"
+          >
+            <td>2024-07-29</td>
+            <td>03:00 PM</td>
+            <td>Ibu Rina Wijaya</td>
+            <td>Maria Fransiska</td>
+            <td>Kekerasan Seksual</td>
+            <td id="status-5">
+              <span class="status-badge status-badge-red">Dibatalkan</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tableRows = document.querySelectorAll(".schedule-row");
+    const detailGrid = document.getElementById("detail-grid");
+    const detailNote = document.getElementById("detail-note");
+    const detailStatusWrapper = document.getElementById(
+      "detail-status-wrapper"
+    );
+    const cancelButton = document.getElementById("cancel-session-btn");
+
+    // Variabel global untuk melacak sesi yang sedang dipilih
+    let selectedRow = document.querySelector(".schedule-row.selected");
+
+    // Fungsi untuk memperbarui detail sesi
+    function updateDetail(row) {
+      // Hapus class 'selected' dari semua baris dan atur baris baru
+      tableRows.forEach((r) => r.classList.remove("selected"));
+      row.classList.add("selected");
+      selectedRow = row; // Perbarui sesi yang sedang aktif
+
+      // 1. Ambil data dari data-attributes
+      const data = {
+        tanggal: row.dataset.tanggal,
+        waktu: row.dataset.waktu,
+        konselor: row.dataset.konselor,
+        klien: row.dataset.klien,
+        topik: row.dataset.topik,
+        durasi: row.dataset.durasi,
+        jenis: row.dataset.jenis,
+        status: row.dataset.status,
+        note: row.dataset.note,
+        badgeClass: row.dataset.badgeClass,
+      };
+
+      // 2. Update Detail Grid
+      detailGrid.innerHTML = `
+                <p><strong>Tanggal:</strong> ${data.tanggal}</p>
+                <p><strong>Waktu:</strong> ${data.waktu}</p>
+                <p><strong>Konselor:</strong> ${data.konselor}</p>
+                <p><strong>Klien:</strong> ${data.klien}</p>
+                <p><strong>Topik:</strong> ${data.topik}</p>
+                <p><strong>Durasi:</strong> ${data.durasi}</p>
+                <p><strong>Jenis Konseling:</strong> ${data.jenis}</p>
+            `;
+
+      // 3. Update Status
+      detailStatusWrapper.innerHTML = `
+                <strong>Status:</strong>
+                <span id="detail-status" class="status-badge ${data.badgeClass}">${data.status}</span>
+            `;
+      detailGrid.appendChild(detailStatusWrapper); // Tambahkan kembali ke grid
+
+      // 4. Update Catatan
+      detailNote.textContent = data.note;
+
+      // 5. Atur tampilan tombol Batalkan
+      if (data.status === "Selesai" || data.status === "Dibatalkan") {
+        cancelButton.disabled = true;
+        cancelButton.textContent = `Sesi Sudah ${data.status}`;
+        cancelButton.classList.remove("purple");
+        cancelButton.style.backgroundColor = "#ccc";
+        cancelButton.style.borderColor = "#ccc";
+        cancelButton.style.cursor = "not-allowed";
+      } else {
+        cancelButton.disabled = false;
+        cancelButton.textContent = `Batalkan Sesi`;
+        cancelButton.classList.add("purple");
+        cancelButton.style.backgroundColor = "";
+        cancelButton.style.borderColor = "";
+        cancelButton.style.cursor = "pointer";
+      }
+    }
+
+    // Fungsi Pembatalan Sesi (Fungsionalitas yang Anda minta)
+    function cancelSession() {
+      if (!selectedRow) {
+        alert("Pilih sesi yang ingin dibatalkan terlebih dahulu.");
+        return;
+      }
+
+      const currentStatus = selectedRow.dataset.status;
+      if (currentStatus === "Selesai" || currentStatus === "Dibatalkan") {
+        alert(
+          `Sesi ini sudah berstatus: ${currentStatus}. Pembatalan tidak dapat dilakukan.`
+        );
+        return;
+      }
+
+      // Konfirmasi ke pengguna
+      const confirmation = confirm(
+        `Anda yakin ingin membatalkan sesi dengan klien: ${selectedRow.dataset.klien} (${selectedRow.dataset.tanggal})?`
+      );
+
+      if (confirmation) {
+        // 1. Ubah data atribut pada baris yang dipilih (Simulasi update data)
+        selectedRow.dataset.status = "Dibatalkan";
+        selectedRow.dataset.badgeClass = "status-badge-red";
+
+        // 2. Update tampilan status di kolom tabel
+        const tableStatusCell = selectedRow.querySelector("td:last-child");
+        tableStatusCell.innerHTML = `
+                    <span class="status-badge status-badge-red">Dibatalkan</span>
+                `;
+
+        // 3. Update tampilan Detail Sesi (ini juga akan menonaktifkan tombol)
+        updateDetail(selectedRow);
+
+        // 4. Beri notifikasi
+        alert(
+          `Sesi pada tanggal ${selectedRow.dataset.tanggal} berhasil dibatalkan.`
+        );
+      }
+    }
+
+    // Inisialisasi Event Listeners
+
+    // A. Event listener untuk tabel (memilih sesi)
+    tableRows.forEach((row) => {
+      row.addEventListener("click", function () {
+        updateDetail(this);
+      });
+    });
+
+    // B. Event listener untuk tombol Batalkan Sesi
+    cancelButton.addEventListener("click", cancelSession);
+
+    // C. Inisialisasi: Pastikan detail sesi pertama yang terpilih terisi saat dimuat
+    if (selectedRow) {
+      updateDetail(selectedRow);
+    }
+  });
+</script>
+{% endblock %}

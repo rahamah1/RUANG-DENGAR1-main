@@ -1,0 +1,326 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Ruang Dengar{% endblock %}</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+      /* --- Reset & Font Global --- */
+      body,
+      html {
+        height: 100%;
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background-color: #f9f9f9; /* Latar belakang abu-abu sangat muda */
+      }
+      * {
+        box-sizing: border-box;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      /* --- Layout Aplikasi Utama --- */
+      .app-container {
+        display: flex;
+        height: 100vh;
+      }
+
+      /* --- 1. Sidebar (Kiri) --- */
+      .sidebar {
+        width: 260px;
+        background-color: #ffff; /* Warna putih */
+        color: #5a509b;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        flex-shrink: 0;
+        height: 100vh; /* Penuh tinggi */
+        position: fixed; /* Tetap di kiri */
+        left: 0;
+        top: 0;
+      }
+      .sidebar-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #5a509b; /* Garis pemisah ungu muda */
+      }
+      .sidebar-logo img {
+        width: 40px;
+        height: 40px;
+      }
+      .sidebar-header h2 {
+        margin: 0;
+        font-size: 20px;
+        color: #5a509b;
+      }
+      .sidebar-nav {
+        margin-top: 25px;
+        flex-grow: 1;
+      }
+      .sidebar-nav .nav-title {
+        font-size: 12px;
+        text-transform: uppercase;
+        color: #9a90d3; /* Warna "Working space" */
+        margin-bottom: 10px;
+        font-weight: 500;
+      }
+      .sidebar-nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .sidebar-nav li a {
+        display: flex; /* Ubah ke flex */
+        align-items: center; /* Ratakan ikon & teks */
+        gap: 10px; /* Jarak antara ikon dan teks */
+        padding: 12px 15px;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+        font-size: 14px;
+      }
+      .sidebar-nav li a:hover {
+        background-color: #5a509b;
+        color: #ffffff;
+      }
+      /* Item menu yang aktif */
+      .sidebar-nav li a.active {
+        background-color: #6a5acd; /* Warna ungu aktif */
+        color: #ffffff;
+        font-weight: 600;
+      }
+      /* Ikon menu (placeholder) */
+      .sidebar-nav li a::before {
+        content: "●"; /* Placeholder ikon, ganti dengan SVG/Font */
+        font-size: 10px;
+        width: 16px; /* Lebar untuk ikon */
+        opacity: 0.5;
+      }
+      .sidebar-nav li a.active::before {
+        opacity: 1;
+      }
+
+      .sidebar-footer {
+        border-top: 1px solid #5a509b;
+        padding-top: 20px;
+      }
+      .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+      .user-avatar img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #ccc;
+      }
+      .user-info h4 {
+        margin: 0;
+        font-size: 14px;
+        color: #000000;
+        font-weight: 600;
+      }
+      .user-info span {
+        font-size: 12px;
+        color: #000000;
+        display: block; /* Agar ke bawah */
+      }
+      .logout-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 15px;
+        color: #000000;
+        border-radius: 8px;
+        font-size: 14px;
+      }
+      .logout-link:hover {
+        background-color: #5a509b;
+        color: #ffffff;
+      }
+
+      /* --- 2. Main Content (Kanan) --- */
+      .main-content {
+        flex-grow: 1;
+        margin-left: 260px; /* Se-lebar sidebar */
+        display: flex;
+        flex-direction: column;
+        height: 100vh; /* Penuh tinggi */
+      }
+      .main-header {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        padding: 20px 30px;
+        background-color: #ffffff;
+        border-bottom: 1px solid #eee;
+        flex-shrink: 0; /* Jangan menyusut */
+      }
+      .header-user-info {
+        display: flex;
+        align-items: center;
+        gap: 20px; /* Jarak notif & nama */
+        font-size: 14px;
+        font-weight: 500;
+        color: #555;
+      }
+      /* Gaya Baru untuk Link Notifikasi */
+      .notification-link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #555;
+        padding: 8px; /* Tambahkan padding agar mudah diklik */
+        border-radius: 8px;
+        transition: background-color 0.2s;
+      }
+      .notification-link:hover {
+        background-color: #f0f0f0;
+        color: #3a307b;
+      }
+      .notification-link .bell-icon {
+        font-size: 16px;
+      }
+      .header-user-info span {
+        display: flex;
+        align-items: center;
+        gap: 8px; /* Jarak ikon & teks */
+      }
+
+      /* --- 3. Scrollable Content Area --- */
+      .scrollable-content {
+        flex-grow: 1;
+        overflow-y: auto; /* KONTEN UTAMA BISA SCROLL DI SINI */
+        padding: 30px;
+      }
+
+      /* --- 4. Footer (di dalam area scroll) --- */
+      .main-footer {
+        margin-top: 30px; /* Jarak dari konten terakhir */
+        padding: 20px;
+        background-color: #3a307b; /* Warna ungu tua */
+        color: #aaa;
+        border-radius: 8px;
+        font-size: 13px;
+        text-align: center;
+      }
+      .main-footer a {
+        color: #ffffff;
+        font-weight: 500;
+        margin: 0 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">
+            <img src="{% static 'images/logo.png' %}" alt="Logo Ruang Dengar" />
+          </div>
+          <h2>Ruang Dengar</h2>
+        </div>
+
+        <nav class="sidebar-nav">
+          <div class="nav-title">Working space</div>
+          <ul>
+            <li>
+              <a
+                href="{% url 'home' %}"
+                class="{% if active_page == 'dashboard' %}active{% endif %}"
+                >Dashboard</a
+              >
+            </li>
+            <li>
+              <a
+                href="{% url 'kelola-jadwal' %}"
+                class="{% if active_page == 'kelola-jadwal' %}active{% endif %}"
+                >Kelola Jadwal Konseling</a
+              >
+            </li>
+            <li>
+              <a
+                href="{% url 'lihat-jadwal' %}"
+                class="{% if active_page == 'lihat-jadwal' %}active{% endif %}"
+                >Lihat Jadwal Konseling</a
+              >
+            </li>
+            <li>
+              <a
+                href="{% url 'kelola-laporan' %}"
+                class="{% if active_page == 'kelola-laporan' %}active{% endif %}"
+                >Kelola Laporan</a
+              >
+            </li>
+            <li>
+              <a
+                href="{% url 'kelola-pengguna' %}"
+                class="{% if active_page == 'kelola-pengguna' %}active{% endif %}"
+                >Kelola Pengguna</a
+              >
+            </li>
+
+            <li>
+              <a
+                href="{% url 'kelola-konten' %}"
+                class="{% if active_page == 'kelola-konten' %}active{% endif %}"
+                >Kelola Konten & Informasi</a
+              >
+            </li>
+          </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="user-profile">
+            <div class="user-avatar">
+              <img
+                src="{% static 'images/placeholder_avatar.png' %}"
+                alt="Avatar"
+              />
+            </div>
+            <div class="user-info">
+              <h4>{{ nama_user|default:'User' }}</h4>
+              <span>{{ email_user|default:'email@user.com' }}</span>
+            </div>
+          </div>
+          <a href="{% url 'logout' %}" class="logout-link">Keluar</a>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="main-header">
+          <div class="header-user-info">
+            <a href="#" class="notification-link">
+              <span class="bell-icon">🔔</span>
+              Notifikasi ({{ unread_count|default:0 }})
+            </a>
+
+            <span>{{ nama_user|default:'User' }}</span>
+          </div>
+        </header>
+
+        <div class="scrollable-content">
+          {% block content %} {% endblock %}
+          <footer class="main-footer">
+            © 2024 RuangDengar. Semua hak cipta dilindungi undang-undang.
+            <a href="#">Kebijakan Privasi</a>
+            <a href="#">Dukungan: support@RuangDengar.com</a>
+          </footer>
+        </div>
+      </main>
+    </div>
+
+    {% block scripts %} {% endblock %}
+  </body>
+</html>
