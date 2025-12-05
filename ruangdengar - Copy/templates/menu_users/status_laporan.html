@@ -1,0 +1,259 @@
+{% extends "base_user.html" %}
+{% load static %}
+
+{% block title %}Lacak Status Laporan | Ruang Dengar{% endblock %}
+
+{% block content %}
+
+<style>
+    .status-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    .status-header {
+        margin-bottom: 40px;
+    }
+
+    .status-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+    }
+
+    .laporan-id {
+        font-size: 14px;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .progress-section {
+        background: #fff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        margin-bottom: 25px;
+    }
+
+    .progress-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 35px;
+    }
+
+    .progress-tracker {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        position: relative;
+        margin-bottom: 50px;
+    }
+
+    .progress-line {
+        position: absolute;
+        top: 25px;
+        left: 12.5%;
+        right: 12.5%;
+        height: 3px;
+        background: #e0e0e0;
+        z-index: 0;
+    }
+
+    .progress-line-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        background: #7b61ff;
+        transition: width 0.5s ease;
+    }
+
+    .progress-step {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .step-icon-wrapper {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+        transition: all 0.3s;
+    }
+
+    .step-icon-wrapper.active {
+        background: #7b61ff;
+        box-shadow: 0 4px 12px rgba(123, 97, 255, 0.3);
+    }
+
+    .step-icon-wrapper.inactive {
+        background: #f0f0f0;
+    }
+
+    .step-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .step-icon.active {
+        color: #fff;
+    }
+
+    .step-icon.inactive {
+        color: #aaa;
+    }
+
+    .step-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #333;
+        text-align: center;
+        max-width: 100px;
+    }
+
+    .step-label.inactive {
+        color: #999;
+    }
+
+    .status-info-box {
+        background: #f5f3ff;
+        border-left: 4px solid #7b61ff;
+        padding: 20px 25px;
+        border-radius: 8px;
+    }
+
+    .status-info-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .status-info-value {
+        font-size: 16px;
+        font-weight: 700;
+        color: #7b61ff;
+        margin-bottom: 4px;
+    }
+
+    .status-info-date {
+        font-size: 13px;
+        color: #666;
+    }
+
+    @media (max-width: 768px) {
+        .progress-tracker {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .progress-line {
+            left: 25px;
+            top: 25px;
+            bottom: 0;
+            width: 3px;
+            height: auto;
+            right: auto;
+        }
+
+        .progress-step {
+            flex-direction: row;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .step-icon-wrapper {
+            margin-right: 15px;
+            margin-bottom: 0;
+        }
+
+        .step-label {
+            text-align: left;
+        }
+    }
+</style>
+
+<div class="status-container">
+
+    <!-- Header -->
+    <div class="status-header">
+        <h1 class="status-title">Status Laporan Anda</h1>
+        <p class="laporan-id">ID Laporan: <strong>{{ laporan.kode }}</strong></p>
+    </div>
+
+    <!-- Progress Section -->
+    <div class="progress-section">
+        <h2 class="progress-title">Progres Laporan</h2>
+
+        <div class="progress-tracker">
+            <!-- Progress Line -->
+            <div class="progress-line">
+                <div class="progress-line-fill" style="width: 50%;"></div>
+            </div>
+
+            <!-- Step 1: Laporan Diterima -->
+            <div class="progress-step">
+                <div class="step-icon-wrapper active">
+                    <svg class="step-icon active" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <span class="step-label">Laporan Diterima</span>
+            </div>
+
+            <!-- Step 2: Dalam Proses -->
+            <div class="progress-step">
+                <div class="step-icon-wrapper active">
+                    <svg class="step-icon active" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <span class="step-label">Dalam Proses</span>
+            </div>
+
+            <!-- Step 3: Verifikasi Tim -->
+            <div class="progress-step">
+                <div class="step-icon-wrapper inactive">
+                    <svg class="step-icon inactive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                </div>
+                <span class="step-label inactive">Verifikasi Tim</span>
+            </div>
+
+            <!-- Step 4: Selesai -->
+            <div class="progress-step">
+                <div class="step-icon-wrapper inactive">
+                    <svg class="step-icon inactive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <span class="step-label inactive">Selesai</span>
+            </div>
+        </div>
+
+        <!-- Status Info Box -->
+        <div class="status-info-box">
+            <div class="status-info-label">Status Terkini:</div>
+            <div class="status-info-value">{{ laporan.status }}</div>
+            <div class="status-info-date">Terakhir diperbarui: {{ laporan.updated_at|date:"d F Y, H:i" }} WIB</div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

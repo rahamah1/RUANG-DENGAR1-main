@@ -1,0 +1,431 @@
+{% extends 'base.html' %} {% load static %} {% block title %}Daftar Notifikasi{%
+endblock %} {% block content %}
+<style>
+  /* --- Palet Warna Berdasarkan Contoh --- */
+  :root {
+    --primary-color: #6d28d9; /* Ungu/Violet Utama */
+    --primary-light: #f3e8ff; /* Ungu Sangat Muda (untuk highlight) */
+    --text-dark: #1f2937;
+    --text-secondary: #6b7280;
+    --background-light: #f9fafb;
+    --border-color: #e5e7eb;
+    --success-color: #059669;
+    --warning-color: #f59e0b;
+    --delete-color: #dc2626; /* Warna Merah untuk Aksi Hapus */
+  }
+
+  /* --- Layout Halaman Utama (Main Content) --- */
+  .notification-page-container {
+    padding: 30px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .main-card {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    padding: 30px;
+  }
+
+  /* --- Header & Aksi Notifikasi --- */
+  .notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .notification-header h1 {
+    font-size: 28px;
+    color: var(--text-dark);
+    margin: 0;
+    font-weight: 700;
+  }
+  .action-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  /* Tombol HAPUS */
+  #deleteSelectedButton {
+    background-color: var(--delete-color); /* Mengubah warna menjadi Merah */
+    color: #fff;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  #deleteSelectedButton:hover {
+    background-color: #b91c1c;
+  }
+
+  /* --- Daftar Notifikasi --- */
+  .notification-section {
+    margin-bottom: 30px;
+  }
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 15px;
+    padding: 5px 0;
+    border-left: 4px solid var(--primary-color);
+    padding-left: 10px;
+  }
+
+  .notification-item {
+    display: flex;
+    align-items: center; /* Mengubah flex-start menjadi center */
+    padding: 15px 10px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid #f3f4f6;
+    cursor: pointer;
+  }
+  .notification-item:last-child {
+    border-bottom: none;
+  }
+
+  .notification-item.is-new {
+    background-color: var(--primary-light);
+    border-left: 5px solid var(--primary-color);
+    padding-left: 5px;
+  }
+  .notification-item:hover {
+    background-color: #f0f0f0;
+  }
+
+  .icon-wrapper {
+    font-size: 20px;
+    width: 35px;
+    min-width: 35px;
+    text-align: center;
+    margin-right: 15px;
+    color: var(--primary-color);
+  }
+  .icon-wrapper.success {
+    color: var(--success-color);
+  }
+  .icon-wrapper.warning {
+    color: var(--warning-color);
+  }
+  .icon-wrapper.danger {
+    color: #dc2626;
+  }
+  .icon-wrapper.default {
+    color: var(--text-secondary);
+  }
+
+  .notification-details {
+    flex-grow: 1;
+    line-height: 1.5;
+  }
+  .notification-details p {
+    margin: 0;
+    font-size: 15px;
+    color: var(--text-dark);
+    font-weight: 500;
+  }
+  .notification-details .time {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 5px;
+    font-style: italic;
+  }
+
+  .notification-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Jarak antar elemen aksi ditingkatkan */
+    margin-left: 20px;
+  }
+  .notification-actions input[type="checkbox"] {
+    transform: scale(1.2);
+    cursor: pointer;
+    accent-color: var(--primary-color);
+  }
+
+  .notification-tag {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary-color);
+    background-color: #e5e7eb;
+    padding: 4px 10px;
+    border-radius: 9999px;
+  }
+  .arrow-icon {
+    color: var(--primary-color);
+    font-size: 22px;
+    transition: transform 0.3s;
+    margin-left: 5px; /* Tambahkan sedikit jarak dari checkbox/tag */
+  }
+  .notification-item:hover .arrow-icon {
+    transform: translateX(3px);
+  }
+
+  /* --- Footer Aksi --- */
+  .load-more {
+    display: block;
+    width: fit-content;
+    margin: 30px auto 10px;
+    padding: 10px 25px;
+    background: #fff;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  .load-more:hover {
+    background: var(--primary-color);
+    color: #fff;
+  }
+</style>
+
+<div class="notification-page-container">
+  <div class="main-card">
+    <div class="notification-header">
+      <h1>Daftar Notifikasi</h1>
+      <div class="action-group">
+        <label
+          style="
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+            color: var(--text-secondary);
+          "
+        >
+          <input
+            type="checkbox"
+            id="selectAll"
+            style="
+              transform: scale(1.1);
+              accent-color: var(--primary-color);
+              cursor: pointer;
+            "
+          />
+          Pilih Semua
+        </label>
+        <button id="deleteSelectedButton">
+          🗑️ Hapus Notifikasi yang Diceklis
+        </button>
+      </div>
+    </div>
+
+    <div class="notification-section">
+      <div class="section-title">Baru</div>
+
+      <div
+        class="notification-item is-new"
+        data-type="laporan"
+        data-target-id="#L003"
+      >
+        <span class="icon-wrapper default">📝</span>
+        <div class="notification-details">
+          <p>
+            Anda ditugaskan pada **Laporan Insiden #L003** oleh Administrator
+            sistem.
+          </p>
+          <div class="time">Baru Saja</div>
+        </div>
+        <div class="notification-actions">
+          <span class="notification-tag">BARU</span>
+          <input type="checkbox" class="notification-checkbox" />
+          <span class="arrow-icon">→</span>
+        </div>
+      </div>
+
+      <div
+        class="notification-item is-new"
+        data-type="jadwal"
+        data-target-id="rahmad-sesi-1"
+      >
+        <span class="icon-wrapper default">✅</span>
+        <div class="notification-details">
+          <p>
+            Jadwal konseling Anda dengan **Rahmah (Konseli)** telah
+            dikonfirmasi.
+          </p>
+          <div class="time">30 menit yang lalu</div>
+        </div>
+        <div class="notification-actions">
+          <span class="notification-tag">BARU</span>
+          <input type="checkbox" class="notification-checkbox" />
+          <span class="arrow-icon">→</span>
+        </div>
+      </div>
+
+      <div
+        class="notification-item is-new"
+        data-type="pengingat"
+        data-target-id="bimbingan-kelompok-1"
+      >
+        <span class="icon-wrapper warning">⚠️</span>
+        <div class="notification-details">
+          <p>
+            **Pengingat**: Sesi bimbingan kelompok akan dimulai dalam 10 menit.
+          </p>
+          <div class="time">9 jam yang lalu</div>
+        </div>
+        <div class="notification-actions">
+          <span class="notification-tag">BARU</span>
+          <input type="checkbox" class="notification-checkbox" />
+          <span class="arrow-icon">→</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="notification-section">
+      <div class="section-title">Sebelumnya</div>
+
+      <div class="notification-item" data-type="laporan" data-target-id="#L002">
+        <span class="icon-wrapper success">⭐</span>
+        <div class="notification-details">
+          <p>
+            Status **Laporan #L002** (Kerusakan) telah diperbarui menjadi
+            **Selesai**.
+          </p>
+          <div class="time">Kemarin, 14:00</div>
+        </div>
+        <div class="notification-actions">
+          <input type="checkbox" class="notification-checkbox" />
+          <span class="arrow-icon">→</span>
+        </div>
+      </div>
+
+      <div
+        class="notification-item"
+        data-type="sistem"
+        data-target-id="password-reset"
+      >
+        <span class="icon-wrapper default">🔐</span>
+        <div class="notification-details">
+          <p>
+            Kata sandi akun Anda berhasil diubah. Jika ini bukan Anda, segera
+            hubungi admin.
+          </p>
+          <div class="time">2 hari yang lalu</div>
+        </div>
+        <div class="notification-actions">
+          <input type="checkbox" class="notification-checkbox" />
+          <span class="arrow-icon">→</span>
+        </div>
+      </div>
+
+      <div
+        class="notification-item"
+        data-type="sistem"
+        data-target-id="maintenance-2024"
+      >
+        <span class="icon-wrapper danger">⚙️</span>
+        <div class="notification-details">
+          <p>
+            Sistem sedang dalam **pemeliharaan terjadwal** pada 20 Desember
+            2024.
+          </p>
+          <div class="time">1 minggu yang lalu</div>
+        </div>
+        <div class="notification-actions">
+          <input type="checkbox" class="notification-checkbox" />
+          <span class="arrow-icon">→</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="load-more">Muat Notifikasi Lainnya (3)</button>
+  </div>
+</div>
+
+<script>
+  const selectAllCheckbox = document.getElementById("selectAll");
+  const notificationCheckboxes = document.querySelectorAll(
+    ".notification-checkbox"
+  );
+  const deleteSelectedButton = document.getElementById("deleteSelectedButton");
+  const notificationItems = document.querySelectorAll(".notification-item");
+
+  // 1. Fungsi Navigasi ke Halaman yang Benar
+  function handleNotificationClick(item) {
+    const type = item.dataset.type;
+    const targetId = item.dataset.targetId;
+
+    if (type === "laporan") {
+      // Jika notifikasi adalah laporan, arahkan ke halaman Kelola Laporan
+      // Asumsi URL halaman Kelola Laporan adalah '/kelola-laporan/'
+      window.location.href = `/kelola-laporan/?laporan_id=${targetId}`;
+      console.log(`Mengarah ke halaman Kelola Laporan untuk ID: ${targetId}`);
+    } else if (type === "jadwal" || type === "pengingat") {
+      // Jika notifikasi adalah jadwal, arahkan ke halaman Kelola Jadwal
+      window.location.href = `/kelola-jadwal/?sesi_id=${targetId}`;
+      console.log(`Mengarah ke halaman Kelola Jadwal untuk ID: ${targetId}`);
+    } else {
+      // Untuk notifikasi sistem atau lainnya, bisa diarahkan ke modal atau halaman umum
+      alert(`Detail Notifikasi Sistem ID: ${targetId}`);
+    }
+  }
+
+  // Terapkan event listener pada setiap item notifikasi (mengabaikan klik pada checkbox)
+  notificationItems.forEach((item) => {
+    item.addEventListener("click", function (e) {
+      // Pastikan klik bukan pada checkbox atau panah
+      if (
+        e.target.type !== "checkbox" &&
+        !e.target.closest(".notification-actions")
+      ) {
+        handleNotificationClick(this);
+      }
+    });
+
+    // Tambahkan event listener khusus untuk panah (opsional, tapi disarankan)
+    const arrow = item.querySelector(".arrow-icon");
+    if (arrow) {
+      arrow.addEventListener("click", function (e) {
+        e.stopPropagation(); // Mencegah klik panah memicu klik checkbox
+        handleNotificationClick(item);
+      });
+    }
+  });
+
+  // 2. Fungsionalitas "Pilih Semua"
+  selectAllCheckbox.addEventListener("change", function () {
+    notificationCheckboxes.forEach((checkbox) => {
+      checkbox.checked = this.checked;
+    });
+  });
+
+  // 3. Fungsionalitas "Hapus Notifikasi yang Diceklis"
+  deleteSelectedButton.addEventListener("click", function () {
+    const selectedNotifications = Array.from(notificationCheckboxes).filter(
+      (cb) => cb.checked
+    );
+
+    if (selectedNotifications.length === 0) {
+      alert("Tidak ada notifikasi yang dipilih untuk dihapus.");
+      return;
+    }
+
+    if (
+      confirm(
+        `Anda yakin ingin menghapus ${selectedNotifications.length} notifikasi yang dipilih? Tindakan ini tidak dapat dibatalkan.`
+      )
+    ) {
+      selectedNotifications.forEach((checkbox) => {
+        const item = checkbox.closest(".notification-item");
+        item.remove(); // Hapus elemen dari DOM
+      });
+      selectAllCheckbox.checked = false;
+      alert(`${selectedNotifications.length} notifikasi telah dihapus.`);
+
+      // Di sini Anda perlu menambahkan AJAX call untuk menghapus notifikasi dari database
+      // Contoh: sendDeleteRequest(listOfNotificationIDs);
+    }
+  });
+</script>
+{% endblock %}

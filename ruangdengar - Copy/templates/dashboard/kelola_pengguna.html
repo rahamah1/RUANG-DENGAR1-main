@@ -1,0 +1,413 @@
+{% extends 'base.html' %} {% load static %} {% block title %}Kelola Pengguna
+{% endblock %} {% block content %}
+<style>
+  :root {
+    --primary: #4f46e5;
+    --danger: #dc2626;
+    --success: #16a34a;
+    --gray-light: #f3f4f6;
+    --text-dark: #1f2937;
+    --text-light: #6b7280;
+  }
+
+  body {
+    font-family: "Poppins", sans-serif;
+    background: #f9fafb;
+  }
+
+  .container-user {
+    padding: 30px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    max-width: 1000px;
+    margin: 30px auto;
+  }
+
+  h2 {
+    color: var(--text-dark);
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .search-filter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .search-filter input,
+  .search-filter select {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    padding: 12px 15px;
+    text-align: left;
+  }
+
+  th {
+    background: var(--gray-light);
+    color: var(--text-light);
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+
+  td {
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .user-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .user-cell img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+  }
+
+  .status {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .aktif {
+    background: #dcfce7;
+    color: var(--success);
+  }
+
+  .nonaktif {
+    background: #fee2e2;
+    color: var(--danger);
+  }
+
+  .actions span {
+    cursor: pointer;
+    margin-right: 8px;
+    font-size: 18px;
+  }
+
+  .actions span:hover {
+    color: var(--primary);
+  }
+
+  /* Modal Styling */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-content {
+    background: #fff;
+    border-radius: 10px;
+    padding: 25px;
+    width: 400px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    animation: fadeIn 0.25s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: var(--text-dark);
+  }
+
+  .modal-content label {
+    font-weight: 600;
+    display: block;
+    margin-top: 10px;
+  }
+
+  .modal-content input,
+  .modal-content select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    margin-top: 5px;
+  }
+
+  .modal-buttons {
+    margin-top: 20px;
+    text-align: right;
+  }
+
+  .btn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .btn-cancel {
+    background: #e5e7eb;
+  }
+
+  .btn-save {
+    background: var(--primary);
+    color: white;
+  }
+
+  .btn-confirm {
+    background: var(--danger);
+    color: white;
+  }
+</style>
+
+<!-- ======= Konten Utama ======= -->
+<section class="container-user">
+  <h2>Kelola Pengguna</h2>
+
+  <!-- Search dan Filter -->
+  <div class="search-filter">
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Cari nama atau email..."
+      onkeyup="renderUsers()"
+    />
+    <select id="statusFilter" onchange="renderUsers()">
+      <option value="all">Semua Status</option>
+      <option value="active">Aktif</option>
+      <option value="inactive">Tidak Aktif</option>
+    </select>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nama</th>
+        <th>Email</th>
+        <th>Peran</th>
+        <th>Status</th>
+        <th>Aktivitas Terakhir</th>
+        <th>Tindakan</th>
+      </tr>
+    </thead>
+    <tbody id="userTable"></tbody>
+  </table>
+</section>
+
+<!-- ======= Modal Edit ======= -->
+<div class="modal" id="editModal">
+  <div class="modal-content">
+    <h3>Edit Pengguna</h3>
+    <input type="hidden" id="editId" />
+    <label>Nama</label>
+    <input type="text" id="editName" />
+    <label>Email</label>
+    <input type="email" id="editEmail" />
+    <label>Peran</label>
+    <select id="editRole">
+      <option value="Admin">Admin</option>
+      <option value="Anggota">Anggota</option>
+    </select>
+    <div class="modal-buttons">
+      <button class="btn btn-cancel" onclick="closeModal()">Batal</button>
+      <button class="btn btn-save" onclick="saveEdit()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======= SweetAlert2 ======= -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- ======= Script Utama ======= -->
+<script>
+  const users = [
+    {
+      id: 1,
+      name: "Budi Santoso",
+      email: "budi.santoso@example.com",
+      role: "Admin",
+      is_active: true,
+      last_activity: "2 jam lalu",
+      avatar: "https://i.pravatar.cc/35?img=3",
+    },
+    {
+      id: 2,
+      name: "Citra Dewi",
+      email: "citra.dewi@example.com",
+      role: "Anggota",
+      is_active: true,
+      last_activity: "5 jam lalu",
+      avatar: "https://i.pravatar.cc/35?img=4",
+    },
+    {
+      id: 3,
+      name: "Andi Wijaya",
+      email: "andi.wijaya@example.com",
+      role: "Anggota",
+      is_active: false,
+      last_activity: "1 hari lalu",
+      avatar: "https://i.pravatar.cc/35?img=5",
+    },
+  ];
+
+  const table = document.getElementById("userTable");
+  const editModal = document.getElementById("editModal");
+
+  function renderUsers() {
+    const searchValue = document
+      .getElementById("searchInput")
+      .value.toLowerCase();
+    const statusFilter = document.getElementById("statusFilter").value;
+
+    table.innerHTML = "";
+
+    const filtered = users.filter((u) => {
+      const matchSearch =
+        u.name.toLowerCase().includes(searchValue) ||
+        u.email.toLowerCase().includes(searchValue);
+      const matchStatus =
+        statusFilter === "all" ||
+        (statusFilter === "active" && u.is_active) ||
+        (statusFilter === "inactive" && !u.is_active);
+      return matchSearch && matchStatus;
+    });
+
+    filtered.forEach((u) => {
+      const status = u.is_active ? "Aktif" : "Tidak Aktif";
+      const statusClass = u.is_active ? "aktif" : "nonaktif";
+      const row = `
+        <tr>
+          <td class="user-cell"><img src="${u.avatar}">${u.name}</td>
+          <td>${u.email}</td>
+          <td>${u.role}</td>
+          <td><span class="status ${statusClass}">${status}</span></td>
+          <td>${u.last_activity}</td>
+          <td class="actions">
+            <span title="Edit" onclick="openEdit(${u.id})">✏️</span>
+            <span title="Reset Password" onclick="confirmReset(${u.id})">🔑</span>
+            <span title="Hapus" onclick="confirmDelete(${u.id})">🗑️</span>
+          </td>
+        </tr>
+      `;
+      table.insertAdjacentHTML("beforeend", row);
+    });
+
+    if (filtered.length === 0) {
+      table.innerHTML =
+        '<tr><td colspan="6" style="text-align:center; color:gray;">Tidak ada data ditemukan.</td></tr>';
+    }
+  }
+
+  function openEdit(id) {
+    const user = users.find((u) => u.id === id);
+    document.getElementById("editId").value = user.id;
+    document.getElementById("editName").value = user.name;
+    document.getElementById("editEmail").value = user.email;
+    document.getElementById("editRole").value = user.role;
+    editModal.style.display = "flex";
+  }
+
+  function saveEdit() {
+    const id = parseInt(document.getElementById("editId").value);
+    const user = users.find((u) => u.id === id);
+    user.name = document.getElementById("editName").value;
+    user.email = document.getElementById("editEmail").value;
+    user.role = document.getElementById("editRole").value;
+
+    Swal.fire({
+      icon: "success",
+      title: "Berhasil!",
+      text: `Data ${user.name} berhasil diperbarui.`,
+      timer: 1800,
+      showConfirmButton: false,
+    });
+
+    closeModal();
+    renderUsers();
+  }
+
+  function confirmReset(id) {
+    const user = users.find((u) => u.id === id);
+    Swal.fire({
+      title: "Reset Password?",
+      text: `Yakin ingin mereset password untuk ${user.name}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#4f46e5",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Ya, Reset!",
+      cancelButtonText: "Batal",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          icon: "success",
+          title: "Password Direset!",
+          text: `Password ${user.name} telah direset.`,
+          timer: 1600,
+          showConfirmButton: false,
+        });
+      }
+    });
+  }
+
+  function confirmDelete(id) {
+    const user = users.find((u) => u.id === id);
+    Swal.fire({
+      title: "Hapus Pengguna?",
+      text: `Yakin ingin menghapus ${user.name}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const index = users.findIndex((u) => u.id === id);
+        users.splice(index, 1);
+        renderUsers();
+        Swal.fire({
+          icon: "success",
+          title: "Dihapus!",
+          text: `Pengguna ${user.name} berhasil dihapus.`,
+          timer: 1600,
+          showConfirmButton: false,
+        });
+      }
+    });
+  }
+
+  function closeModal() {
+    editModal.style.display = "none";
+  }
+
+  document.addEventListener("DOMContentLoaded", renderUsers);
+</script>
+{% endblock %}

@@ -1,0 +1,184 @@
+{% extends "base_user.html" %}
+{% load static %}
+
+{% block title %}Riwayat Laporan | Ruang Dengar{% endblock %}
+
+{% block content %}
+
+<style>
+    .search-bar {
+        width: 260px;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        font-size: 14px;
+    }
+
+    .report-card {
+        background: #fff;
+        border: 1px solid #eceaff;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .report-left {
+        max-width: 70%;
+    }
+
+    .report-id {
+        font-weight: 700;
+        color: #333;
+        font-size: 17px;
+        margin-bottom: 8px;
+    }
+
+    .date-box {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        color: #555;
+    }
+
+    .date-box img {
+        width: 16px;
+        margin-right: 6px;
+        opacity: 0.75;
+    }
+
+    .actions {
+        margin-top: 14px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-detail {
+        background: #7b61ff;
+        padding: 8px 14px;
+        border-radius: 8px;
+        color: #fff;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .btn-track {
+        background: #f1f1f1;
+        padding: 8px 14px;
+        border-radius: 8px;
+        color: #444;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .approved {
+        background: #e6e0ff;
+        color: #5a3fff;
+    }
+
+    .rejected {
+        background: #ffe3e3;
+        color: #c0392b;
+    }
+</style>
+
+<h1 style="font-size:26px; font-weight:700; color:#333;">Riwayat Laporan</h1>
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+    <p style="color:#666; margin-top:0;">Daftar laporan yang pernah Anda kirimkan.</p>
+
+    <input class="search-bar" type="text" placeholder="🔍 Cari laporan...">
+</div>
+
+<div style="margin-top:25px;">
+
+    <!-- ------------ CARD 1 ------------ -->
+    <div class="report-card">
+        <div class="report-left">
+            <div class="report-id">#RPT-20231120-001</div>
+
+            <div class="date-box">
+                <img src="https://cdn-icons-png.flaticon.com/512/747/747310.png">
+                Tanggal Pengajuan: 2023-11-20
+            </div>
+
+            <div class="actions">
+                <a href="{% url 'detail-laporan' report_id=1 %}" class="btn-detail">Lihat Detail</a>
+                <a href="#" class="btn-track">Lacak</a>
+            </div>
+        </div>
+
+        <span class="badge approved">Disetujui</span>
+    </div>
+
+    <!-- ------------ CARD 2 ------------ -->
+    <div class="report-card">
+        <div class="report-left">
+            <div class="report-id">#RPT-20231118-002</div>
+
+            <div class="date-box">
+                <img src="https://cdn-icons-png.flaticon.com/512/747/747310.png">
+                Tanggal Pengajuan: 2023-11-18
+            </div>
+
+            <div class="actions">
+                <a href="#" class="btn-detail">Lihat Detail</a>
+                <a href="#" class="btn-track">Lacak</a>
+            </div>
+        </div>
+
+        <span class="badge rejected">Ditolak</span>
+    </div>
+
+    <!-- ------------ CARD 3 ------------ -->
+    <div class="report-card">
+        <div class="report-left">
+            <div class="report-id">#RPT-20231115-003</div>
+
+            <div class="date-box">
+                <img src="https://cdn-icons-png.flaticon.com/512/747/747310.png">
+                Tanggal Pengajuan: 2023-11-15
+            </div>
+
+            <div class="actions">
+                <a href="#" class="btn-detail">Lihat Detail</a>
+                <a href="#" class="btn-track">Lacak</a>
+            </div>
+        </div>
+
+        <span class="badge approved">Disetujui</span>
+    </div>
+
+    <!-- ------------ CARD 4 ------------ -->
+    <div class="report-card">
+        <div class="report-left">
+            <div class="report-id">#RPT-20231110-004</div>
+
+            <div class="date-box">
+                <img src="https://cdn-icons-png.flaticon.com/512/747/747310.png">
+                Tanggal Pengajuan: 2023-11-10
+            </div>
+
+            <div class="actions">
+                <a href="#" class="btn-detail">Lihat Detail</a>
+                <a href="#" class="btn-track">Lacak</a>
+            </div>
+        </div>
+
+        <span class="badge rejected">Ditolak</span>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,252 @@
+{% extends "base_user.html" %}
+{% load static %}
+
+{% block title %}Dashboard | Ruang Dengar{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Container max-w-7xl */
+    .container-7xl {
+        max-width: 1280px;
+        /* ukuran 7xl */
+        margin: 0 auto;
+        /* center */
+        padding: 0 20px;
+        /* biar tidak mentok kiri-kanan */
+    }
+
+    /* Grid responsif */
+    .artikel-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin-top: 30px;
+    }
+
+    /* Card */
+    .artikel-card {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #eee;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        transition: 0.2s ease;
+        margin-bottom: 10px;
+    }
+
+    .artikel-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .artikel-image {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        object-position: center;
+    }
+
+    .artikel-body {
+        padding: 20px;
+    }
+
+    .artikel-tag {
+        background: #efe9ff;
+        color: #3a307b;
+        width: max-content;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 6px;
+        margin-bottom: 12px;
+    }
+
+    .artikel-button {
+        width: 100%;
+        padding: 12px;
+        background: #6c4df7;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-top: 12px;
+    }
+
+    .artikel-button:hover {
+        background: #5a3de0;
+    }
+
+    /* Grid artikel rekomendasi */
+    .rekomendasi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 24px;
+        margin-top: 30px;
+        text-align: center;
+    }
+
+    /* Card rekomendasi */
+    .rekomendasi-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 10px;
+        border: 1px solid #eee;
+        transition: 0.2s ease;
+    }
+
+    .rekomendasi-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .rekomendasi-image {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        object-position: center;
+    }
+
+    .rekomendasi-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #333;
+    }
+</style>
+
+
+<div class="container-7xl">
+
+    <h1 style="font-size: 26px; font-weight:700; color:#333;">Edukasi & Informasi</h1>
+    <p style="color:#666; margin-top:-10px; max-width:600px;">
+        Temukan artikel, panduan, dan materi edukasi terbaik untuk mendukung perkembangan Anda.
+    </p>
+
+    <div style="margin-top:20px;">
+        <input type="text" placeholder="Cari artikel..."
+            style="padding:12px 15px; width:300px; border-radius:10px; border:1px solid #ddd;">
+        <button style="padding:12px 18px; border:none; background:#3a307b; color:white; border-radius:10px;">
+            Cari
+        </button>
+    </div>
+
+    <!-- GRID RESPONSIVE -->
+    <div class="artikel-grid">
+
+        <!-- CARD 1 -->
+        <div class="artikel-card">
+            <img src="{% static 'images/artikel1.jpg' %}" class="artikel-image">
+
+            <div class="artikel-body">
+                <p class="artikel-tag">Kesadaran</p>
+                <h3 style="font-size: 18px; font-weight: 700; color:#333;">
+                    Mengenali Kekerasan Seksual dan Dampaknya
+                </h3>
+
+                <p style="color:#666; font-size:14px; margin-top:8px;">
+                    Memahami berbagai bentuk kekerasan seksual, tanda-tanda, dan dampak psikologis serta sosial pada
+                    korban.
+                </p>
+
+                <p style="font-size: 12px; color:#888; margin-top:10px;">14 Juni 2024</p>
+
+                <a href="{% url 'artikel-detail' id=1 %}">
+                    <button class="artikel-button">
+                        Baca Selengkapnya
+                    </button>
+                </a>
+            </div>
+        </div>
+
+        <!-- CARD 2 -->
+        <div class="artikel-card">
+            <img src="{% static 'images/artikel2.jpg' %}" class="artikel-image">
+
+            <div class="artikel-body">
+                <p class="artikel-tag">Pencegahan</p>
+
+                <h3 style="font-size: 18px; font-weight: 700; color:#333;">
+                    Strategi Pencegahan Kekerasan Seksual di Lingkungan Kampus
+                </h3>
+
+                <p style="color:#666; font-size:14px; margin-top:8px;">
+                    Panduan menciptakan lingkungan aman dan mendukung di institusi pendidikan tinggi dengan langkah
+                    proaktif.
+                </p>
+
+                <p style="font-size: 12px; color:#888; margin-top:10px;">12 Juni 2024</p>
+
+                <a href="{% url 'artikel-detail' id=2 %}">
+                    <button class="artikel-button">
+                        Baca Selengkapnya
+                    </button>
+                </a>
+            </div>
+        </div>
+
+        <!-- CARD 3 -->
+        <div class="artikel-card">
+            <img src="{% static 'images/artikel3.jpg' %}" class="artikel-image">
+
+            <div class="artikel-body">
+                <p class="artikel-tag">Dukungan</p>
+
+                <h3 style="font-size: 18px; font-weight: 700; color:#333;">
+                    Mendukung Korban Kekerasan Seksual: Apa yang Harus Dilakukan?
+                </h3>
+
+                <p style="color:#666; font-size:14px; margin-top:8px;">
+                    Informasi untuk memberikan dukungan empati kepada korban kekerasan seksual tanpa menghakimi.
+                </p>
+
+                <p style="font-size: 12px; color:#888; margin-top:10px;">10 Juni 2024</p>
+
+                <a href="{% url 'artikel-detail' id=3 %}">
+                    <button class="artikel-button">
+                        Baca Selengkapnya
+                    </button>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <h1 style="font-size: 26px; font-weight:700; color:#333;">Rekomendasi</h1>
+    <!-- ARTIKEL REKOMENDASI -->
+    <div class="container-7xl">
+
+        <div class="rekomendasi-grid">
+
+            <!-- CARD 1 -->
+            <div class="rekomendasi-card">
+                <img src="{% static 'images/reko1.jpg' %}" class="rekomendasi-image">
+                <p class="rekomendasi-title">Hak-hak Korban Kekerasan Seksual: Sebuah Panduan</p>
+            </div>
+
+            <!-- CARD 2 -->
+            <div class="rekomendasi-card">
+                <img src="{% static 'images/reko2.jpg' %}" class="rekomendasi-image">
+                <p class="rekomendasi-title">Prosedur Pelaporan Kekerasan Seksual yang Aman</p>
+            </div>
+
+            <!-- CARD 3 -->
+            <div class="rekomendasi-card">
+                <img src="{% static 'images/reko3.jpg' %}" class="rekomendasi-image">
+                <p class="rekomendasi-title">Mengelola Trauma Pasca Kekerasan Seksual</p>
+            </div>
+
+            <!-- CARD 4 -->
+            <div class="rekomendasi-card">
+                <img src="{% static 'images/reko4.jpg' %}" class="rekomendasi-image">
+                <p class="rekomendasi-title">Membongkar Mitos Seputar Kekerasan Seksual</p>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+
+{% endblock %}

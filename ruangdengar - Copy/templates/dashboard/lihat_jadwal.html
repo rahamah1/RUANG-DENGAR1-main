@@ -1,0 +1,337 @@
+{% extends 'base.html' %} {% block title %}lihat-jadwal{% endblock %} 
+{% block content %}
+<style>
+  :root {
+    --primary-color: #5d55f3;
+    --active-bg: #eae8ff;
+    --white: #ffffff;
+    --text-dark: #333;
+    --text-light: #777;
+    --border-color: #e0e0e0;
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .content-wrapper {
+    padding: 30px;
+    flex-grow: 1;
+  }
+  .page-title {
+    font-size: 1.8em;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+  .card {
+    background-color: var(--white);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+  }
+  .detail-card {
+    margin-bottom: 20px;
+  }
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 30px;
+    margin-bottom: 20px;
+    font-size: 0.95em;
+  }
+  .detail-grid p strong {
+    color: var(--text-dark);
+    font-weight: bold;
+    margin-right: 5px;
+  }
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+  }
+  .btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    border: 1px solid;
+    transition: background-color 0.2s;
+  }
+  .btn.purple {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
+  }
+  .btn.purple:hover {
+    background-color: #4941d3;
+  }
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  .table-header input {
+    padding: 8px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    width: 300px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  table th,
+  table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9em;
+  }
+  table th {
+    color: var(--text-light);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  table tbody tr {
+    cursor: pointer;
+  }
+  table tbody tr:hover {
+    background-color: #f0f4f7;
+  }
+  table tbody tr.selected {
+    background-color: var(--active-bg);
+    border-left: 4px solid var(--primary-color);
+  }
+  .status-badge {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.75em;
+    font-weight: bold;
+    color: var(--white);
+    text-align: center;
+    display: inline-block;
+  }
+  .status-badge-blue {
+    background-color: #4299e1;
+  }
+  .status-badge-green {
+    background-color: #48bb78;
+  }
+  .status-badge-red {
+    background-color: #f56565;
+  }
+  .status-badge-yellow {
+    background-color: #ffc107;
+  }
+</style>
+
+<div class="content-wrapper">
+  <h1 class="page-title">Lihat Jadwal Konseling</h1>
+
+  <section class="card detail-card">
+    <h3>Detail Sesi Konseling</h3>
+    <div id="detail-grid" class="detail-grid">
+      <p><strong>Tanggal:</strong> 2024-07-20</p>
+      <p><strong>Waktu:</strong> 10:00 AM</p>
+      <p><strong>Konselor:</strong> Dr. Sarah Cahyani</p>
+      <p><strong>Klien:</strong> Budi Santoso</p>
+      <p><strong>Topik:</strong> Manajemen Stres dan Kecemasan</p>
+      <p><strong>Durasi:</strong> 60 menit</p>
+      <p><strong>Jenis Konseling:</strong> Bullying</p>
+      <p id="detail-status-wrapper">
+        <strong>Status:</strong>
+        <span id="detail-status" class="status-badge status-badge-yellow"
+          >Berlangsung</span
+        >
+      </p>
+    </div>
+    <div class="actions">
+      <button id="cancel-session-btn" class="btn purple">Batalkan Sesi</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="table-header">
+      <h3>Daftar Jadwal Konseling</h3>
+      <input type="text" placeholder="Cari jadwal..." />
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Waktu</th>
+          <th>Konselor</th>
+          <th>Klien</th>
+          <th>Topik</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="schedule-body">
+        <tr
+          id="session-1"
+          data-tanggal="2024-07-20"
+          data-waktu="10:00 AM"
+          data-klien="Budi Santoso"
+          data-topik="Manajemen Stres dan Kecemasan"
+          data-status="Berlangsung"
+          data-badge-class="status-badge-yellow"
+          class="schedule-row selected"
+        >
+          <td>2024-07-20</td>
+          <td>10:00 AM</td>
+          <td>Dr. Sarah Cahyani</td>
+          <td>Budi Santoso</td>
+          <td>Manajemen Stres dan Kecemasan</td>
+          <td>
+            <span class="status-badge status-badge-yellow">Berlangsung</span>
+          </td>
+        </tr>
+        <tr
+          id="session-2"
+          data-tanggal="2024-08-01"
+          data-waktu="10:00 AM"
+          data-klien="Dwi Prasetyo"
+          data-topik="Kecemasan Sosial"
+          data-status="Terjadwal"
+          data-badge-class="status-badge-blue"
+          class="schedule-row"
+        >
+          <td>2024-08-01</td>
+          <td>10:00 AM</td>
+          <td>Dr. Sarah Cahyani</td>
+          <td>Dwi Prasetyo</td>
+          <td>Kecemasan Sosial</td>
+          <td><span class="status-badge status-badge-blue">Terjadwal</span></td>
+        </tr>
+        <tr
+          id="session-3"
+          data-tanggal="2024-08-01"
+          data-waktu="02:00 PM"
+          data-klien="Citra Dewi"
+          data-topik="Masalah Karir"
+          data-status="Terjadwal"
+          data-badge-class="status-badge-blue"
+          class="schedule-row"
+        >
+          <td>2024-08-01</td>
+          <td>02:00 PM</td>
+          <td>Dr. Sarah Cahyani</td>
+          <td>Citra Dewi</td>
+          <td>Masalah Karir</td>
+          <td><span class="status-badge status-badge-blue">Terjadwal</span></td>
+        </tr>
+        <tr
+          id="session-4"
+          data-tanggal="2024-07-30"
+          data-waktu="11:00 AM"
+          data-klien="Joko Susilo"
+          data-topik="Stres Kuliah"
+          data-status="Selesai"
+          data-badge-class="status-badge-green"
+          class="schedule-row"
+        >
+          <td>2024-07-30</td>
+          <td>11:00 AM</td>
+          <td>Dr. Sarah Cahyani</td>
+          <td>Joko Susilo</td>
+          <td>Stres Kuliah</td>
+          <td><span class="status-badge status-badge-green">Selesai</span></td>
+        </tr>
+        <tr
+          id="session-5"
+          data-tanggal="2024-07-29"
+          data-waktu="03:00 PM"
+          data-klien="Maria Fransiska"
+          data-topik="Kekerasan Seksual"
+          data-status="Dibatalkan"
+          data-badge-class="status-badge-red"
+          class="schedule-row"
+        >
+          <td>2024-07-29</td>
+          <td>03:00 PM</td>
+          <td>Dr. Sarah Cahyani</td>
+          <td>Maria Fransiska</td>
+          <td>Kekerasan Seksual</td>
+          <td><span class="status-badge status-badge-red">Dibatalkan</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tableRows = document.querySelectorAll(".schedule-row");
+    const detailGrid = document.getElementById("detail-grid");
+    const cancelButton = document.getElementById("cancel-session-btn");
+    let selectedRow = document.querySelector(".schedule-row.selected");
+
+    function updateDetail(row) {
+      tableRows.forEach((r) => r.classList.remove("selected"));
+      row.classList.add("selected");
+      selectedRow = row;
+
+      detailGrid.innerHTML = `
+      <p><strong>Tanggal:</strong> ${row.dataset.tanggal}</p>
+      <p><strong>Waktu:</strong> ${row.dataset.waktu}</p>
+      <p><strong>Konselor:</strong> Dr. Sarah Cahyani</p>
+      <p><strong>Klien:</strong> ${row.dataset.klien}</p>
+      <p><strong>Topik:</strong> ${row.dataset.topik}</p>
+      <p><strong>Durasi:</strong> 60 menit</p>
+      <p><strong>Jenis Konseling:</strong> Bullying</p>
+      <p id="detail-status-wrapper">
+        <strong>Status:</strong>
+        <span id="detail-status" class="status-badge ${row.dataset.badgeClass}">${row.dataset.status}</span>
+      </p>
+    `;
+
+      if (
+        row.dataset.status === "Selesai" ||
+        row.dataset.status === "Dibatalkan"
+      ) {
+        cancelButton.disabled = true;
+        cancelButton.textContent = `Sesi Sudah ${row.dataset.status}`;
+        cancelButton.style.backgroundColor = "#ccc";
+        cancelButton.style.borderColor = "#ccc";
+        cancelButton.style.cursor = "not-allowed";
+      } else {
+        cancelButton.disabled = false;
+        cancelButton.textContent = "Batalkan Sesi";
+        cancelButton.style.backgroundColor = "";
+        cancelButton.style.borderColor = "";
+        cancelButton.style.cursor = "pointer";
+      }
+    }
+
+    tableRows.forEach((row) =>
+      row.addEventListener("click", () => updateDetail(row))
+    );
+
+    cancelButton.addEventListener("click", () => {
+      if (!selectedRow) return alert("Pilih sesi terlebih dahulu.");
+      if (
+        selectedRow.dataset.status === "Selesai" ||
+        selectedRow.dataset.status === "Dibatalkan"
+      ) {
+        return alert(`Sesi ini sudah berstatus: ${selectedRow.dataset.status}`);
+      }
+      if (
+        confirm(`Batalkan sesi dengan klien: ${selectedRow.dataset.klien}?`)
+      ) {
+        selectedRow.dataset.status = "Dibatalkan";
+        selectedRow.dataset.badgeClass = "status-badge-red";
+        selectedRow.querySelector(
+          "td:last-child"
+        ).innerHTML = `<span class="status-badge status-badge-red">Dibatalkan</span>`;
+        updateDetail(selectedRow);
+        alert(
+          `Sesi tanggal ${selectedRow.dataset.tanggal} berhasil dibatalkan.`
+        );
+      }
+    });
+
+    if (selectedRow) updateDetail(selectedRow);
+  });
+</script>
+{% endblock %}

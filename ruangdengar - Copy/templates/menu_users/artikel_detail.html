@@ -1,0 +1,111 @@
+{% extends "base_user.html" %}
+{% load static %}
+
+{% block title %}Detail Artikel | Ruang Dengar{% endblock %}
+
+{% block content %}
+
+<div style="max-width:900px; margin:auto; padding:20px;">
+
+    <!-- Tombol Kembali -->
+    <a href="{% url 'dashboard_user' %}"
+        style="display:inline-block; margin-bottom:20px; color:#6a5acd; font-weight:600;">
+        ← Kembali
+    </a>
+
+    <!-- Judul -->
+    <h1 style="font-size:30px; font-weight:800; color:#222;">
+        {{ data.judul }}
+    </h1>
+
+    <!-- Info Artikel -->
+    <div style="
+    margin-top:20px;
+    background:#ffffff;
+    padding:25px;
+    border-radius:12px;
+    border:2px solid #d8d8d8;
+    display:flex;
+    gap:40px;
+    flex-wrap:wrap;
+">
+
+        <!-- Kolom 1: Kategori + Tanggal Publikasi -->
+        <div style="flex:1; min-width:260px;">
+            <p style="margin:0; font-size:14px; color:#555;">Kategori:</p>
+            <span style="font-size:16px; font-weight:700; display:block; margin-bottom:15px;">
+                {{ data.kategori }}
+            </span>
+
+            <p style="margin:0; font-size:14px; color:#555;">Tanggal Publikasi:</p>
+            <span style="font-size:16px; font-weight:700;">
+                {{ data.tanggal }}
+            </span>
+        </div>
+
+        <!-- Kolom 2: Status + Terakhir Diperbarui -->
+        <div style="flex:1; min-width:260px;">
+            <p style="margin:0; font-size:14px; color:#555;">Status:</p>
+            <span style="
+            background:#6d58ff;
+            color:#fff;
+            padding:6px 14px;
+            border-radius:20px;
+            font-weight:700;
+            font-size:13px;
+            display:inline-block;
+            margin-bottom:15px;
+        ">
+                Diterbitkan
+            </span>
+
+            <p style="margin:0; font-size:14px; color:#555;">Terakhir Diperbarui:</p>
+            <span style="font-size:16px; font-weight:700;">
+                {{ data.updated }}
+            </span>
+        </div>
+        <div style="flex:1;">
+            <p style="margin:0; font-size:14px; color:#555;">Penulis:</p>
+            <span style="font-size:16px; font-weight:700;">
+                {{ data.penulis }}
+            </span>
+        </div>
+
+    </div>
+
+
+    <!-- Card Gambar + Konten Artikel -->
+    <div style="
+    margin-top:25px; 
+    background:#ffffff;
+    border:2px solid #d8d8d8;
+    border-radius:12px;
+    padding:0;
+    overflow:hidden;
+">
+
+        <!-- Gambar -->
+        <img src="{% static data.gambar %}" style="
+        width:100%; 
+        height:350px; 
+        object-fit:cover;
+        display:block;
+    ">
+
+        <!-- Konten Artikel -->
+        <div style="
+        padding:25px;
+        line-height:1.75; 
+        font-size:17px; 
+        color:#333; 
+        white-space:pre-line;
+    ">
+            {{ data.konten }}
+        </div>
+
+    </div>
+
+
+</div>
+
+{% endblock %}

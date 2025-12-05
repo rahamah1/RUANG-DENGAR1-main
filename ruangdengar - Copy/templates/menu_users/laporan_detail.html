@@ -1,0 +1,301 @@
+{% extends "base_user.html" %}
+{% load static %}
+
+{% block title %}Detail Laporan | Ruang Dengar{% endblock %}
+
+{% block content %}
+
+<style>
+    .detail-header {
+        margin-bottom: 35px;
+    }
+
+    .detail-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+    }
+
+    .laporan-id {
+        font-size: 14px;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+        margin-top: 30px;
+    }
+
+    .info-item {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: flex-start;
+    }
+
+    .info-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .info-content {
+        flex: 1;
+    }
+
+    .info-label {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 4px;
+        font-weight: 500;
+    }
+
+    .info-value {
+        font-size: 15px;
+        color: #1a1a1a;
+        font-weight: 500;
+    }
+
+    .status-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .status-label {
+        font-size: 14px;
+        color: #666;
+        margin-right: 12px;
+        font-weight: 500;
+    }
+
+    .status-badge {
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .status-pending {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+
+    .status-approved {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .status-rejected {
+        background: #ffebee;
+        color: #c62828;
+    }
+
+    .description-text {
+        font-size: 15px;
+        line-height: 1.7;
+        color: #333;
+        text-align: justify;
+    }
+
+    .evidence-section {
+        margin-top: 30px;
+    }
+
+    .evidence-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .evidence-item {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.2s;
+    }
+
+    .evidence-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .evidence-image {
+        width: 100%;
+        height: 140px;
+        object-fit: cover;
+        background: #f5f5f5;
+    }
+
+    .evidence-file {
+        width: 100%;
+        height: 140px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f5f5f5;
+    }
+
+    .evidence-file svg {
+        width: 50px;
+        height: 50px;
+        color: #7b61ff;
+    }
+
+    .evidence-name {
+        padding: 12px;
+        font-size: 13px;
+        color: #333;
+        text-align: center;
+        background: #fafafa;
+    }
+
+    .back-btn {
+        margin-top: 35px;
+        padding: 12px 28px;
+        background: #fff;
+        color: #7b61ff;
+        border: 2px solid #7b61ff;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 15px;
+        display: inline-block;
+        transition: all 0.3s;
+    }
+
+    .back-btn:hover {
+        background: #7b61ff;
+        color: #fff;
+    }
+
+    .divider {
+        height: 1px;
+        background: #e0e0e0;
+        margin: 25px 0;
+    }
+</style>
+
+<div class="detail-container">
+    <div class="detail-card">
+
+        <!-- Header -->
+        <div class="detail-header">
+            <h1 class="detail-title">Detail Laporan</h1>
+            <p class="laporan-id">ID Laporan: {{ laporan.kode }}</p>
+        </div>
+
+        <!-- Detail Insiden Section -->
+        <h2 class="section-title">Detail Insiden</h2>
+
+        <!-- Tanggal Pengajuan -->
+        <div class="info-item">
+            <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2" />
+                <line x1="16" y1="2" x2="16" y2="6" stroke-width="2" />
+                <line x1="8" y1="2" x2="8" y2="6" stroke-width="2" />
+                <line x1="3" y1="10" x2="21" y2="10" stroke-width="2" />
+            </svg>
+            <div class="info-content">
+                <div class="info-label">Tanggal Pengajuan:</div>
+                <div class="info-value">{{ laporan.tanggal }}</div>
+            </div>
+        </div>
+
+        <!-- Jenis Insiden -->
+        <div class="info-item">
+            <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke-width="2" />
+                <line x1="12" y1="16" x2="12" y2="12" stroke-width="2" />
+                <circle cx="12" cy="8" r="1" fill="currentColor" />
+            </svg>
+            <div class="info-content">
+                <div class="info-label">Jenis Insiden:</div>
+                <div class="info-value">{{ laporan.jenis }}</div>
+            </div>
+        </div>
+
+        <!-- Lokasi Insiden -->
+        <div class="info-item">
+            <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke-width="2" />
+                <circle cx="12" cy="9" r="2.5" stroke-width="2" />
+            </svg>
+            <div class="info-content">
+                <div class="info-label">Lokasi Insiden:</div>
+                <div class="info-value">{{ laporan.lokasi }}</div>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div class="status-container">
+            <div class="status-label">Status Saat Ini:</div>
+            {% if laporan.status == "Sedang Peninjauan" or laporan.status == "Pending" %}
+            <span class="status-badge status-pending">{{ laporan.status }}</span>
+            {% elif laporan.status == "Disetujui" %}
+            <span class="status-badge status-approved">{{ laporan.status }}</span>
+            {% else %}
+            <span class="status-badge status-rejected">{{ laporan.status }}</span>
+            {% endif %}
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Deskripsi Section -->
+        <h2 class="section-title">Deskripsi</h2>
+        <p class="description-text">{{ laporan.deskripsi }}</p>
+
+        <!-- Bukti Terunggah Section -->
+        <div class="evidence-section">
+            <h2 class="section-title">Bukti Terunggah</h2>
+            <div class="evidence-grid">
+
+                <!-- Image Evidence 1 -->
+                {% if laporan.bukti %}
+                <div class="evidence-item">
+                    <img src="{% static laporan.bukti %}" alt="Foto Insiden 1" class="evidence-image">
+                    <div class="evidence-name">Foto_Insiden_1.jpg</div>
+                </div>
+                {% endif %}
+
+                <!-- Image Evidence 2 -->
+                {% if laporan.bukti %}
+                <div class="evidence-item">
+                    <img src="{% static laporan.bukti %}" alt="Foto Insiden 2" class="evidence-image">
+                    <div class="evidence-name">Foto_Insiden_2.png</div>
+                </div>
+                {% endif %}
+
+                <!-- PDF Evidence -->
+                {% if laporan.bukti %}
+                <div class="evidence-item">
+                    <a href="{% static laporan.bukti %}" target="_blank" style="text-decoration: none; color: inherit;">
+                        <div class="evidence-file">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="2" />
+                                <polyline points="14 2 14 8 20 8" stroke-width="2" />
+                                <line x1="9" y1="15" x2="15" y2="15" stroke-width="2" />
+                                <line x1="9" y1="11" x2="15" y2="11" stroke-width="2" />
+                            </svg>
+                        </div>
+                        <div class="evidence-name">Keaslian_Saksi_Mata.pdf</div>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Back Button -->
+        <a href="{% url 'riwayat-laporan' %}" class="back-btn">Kembali</a>
+
+    </div>
+</div>
+
+{% endblock %}

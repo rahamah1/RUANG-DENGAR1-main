@@ -1,0 +1,771 @@
+{% extends 'base.html' %} {% load static %} {% block title %}Kelola Konten
+{%endblock %} {% block content %}
+<style>
+  /* ===== core styles (kept clean & consistent) ===== */
+  :root {
+    --blue: #5a509b;
+    --muted: #6b7280;
+    --card: #fff;
+    --bg: #f9fafb;
+  }
+  body {
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: var(--bg);
+    color: #111827;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .filter-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  select,
+  .search-input {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    font-size: 14px;
+  }
+  .search-wrapper {
+    position: relative;
+  }
+  .search-wrapper i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    pointer-events: none;
+  }
+  .search-input {
+    padding-left: 34px;
+    width: 260px;
+  }
+
+  .btn-add {
+    background: var(--blue);
+    color: #fff;
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    font-weight: 600;
+  }
+  .btn-add:hover {
+    background: #5a509b;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(2, 6, 23, 0.06);
+  }
+  th,
+  td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid #eef2f7;
+    font-size: 14px;
+    vertical-align: middle;
+  }
+  th {
+    background: var(--blue);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .aksi {
+    display: flex;
+    gap: 8px;
+  }
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+  }
+  .icon-btn.view {
+    color: #5a509b;
+  }
+  .icon-btn.edit {
+    color: #f59e0b;
+  }
+  .icon-btn.del {
+    color: #ef4444;
+  }
+
+  /* modal fullscreen */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(5px);
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    overflow-y: auto;
+  }
+  .modal.fullscreen {
+    align-items: flex-start;
+  }
+
+  .modal-panel {
+    background: var(--card);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 1100px;
+    box-shadow: 0 18px 50px rgba(2, 6, 23, 0.35);
+    overflow: hidden;
+    animation: slideUp 0.32s ease;
+  }
+  @keyframes slideUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .modal-close {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(2, 6, 23, 0.08);
+  }
+  .modal-close:hover {
+    background: #f3f4f6;
+  }
+
+  /* view article layout - fullscreen style */
+  .view-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 0;
+  }
+  .view-left {
+    padding: 28px 32px;
+    max-height: 78vh;
+    overflow: auto;
+  }
+  .view-right {
+    background: #f8fafc;
+    padding: 20px 24px;
+    border-left: 1px solid #eef2f7;
+    max-height: 78vh;
+    overflow: auto;
+  }
+
+  .view-title {
+    font-size: 28px;
+    color: #1e3a8a;
+    margin: 0 0 8px;
+    font-weight: 700;
+  }
+  .view-meta {
+    color: var(--muted);
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+  .view-media {
+    margin: 14px 0;
+  }
+  .view-media img,
+  .view-media iframe {
+    width: 100%;
+    border-radius: 8px;
+  }
+
+  .view-body p {
+    color: #374151;
+    line-height: 1.8;
+    margin-bottom: 12px;
+    text-align: justify;
+    white-space: pre-wrap;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .info-item {
+    background: #fff;
+    border: 1px solid #eef2f7;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #374151;
+  }
+  .info-label {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .info-value {
+    font-weight: 600;
+  }
+
+  /* form modal */
+  .form-body {
+    padding: 20px 24px;
+    max-height: 78vh;
+    overflow: auto;
+  }
+  .form-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .form-col {
+    flex: 1 1 280px;
+    min-width: 180px;
+  }
+  .form-group {
+    margin-bottom: 12px;
+  }
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #374151;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    background: #fff;
+  }
+  .form-group textarea {
+    min-height: 140px;
+    resize: vertical;
+  }
+  .img-preview {
+    width: 140px;
+    height: 84px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #e6e9ee;
+  }
+
+  .form-actions {
+    padding: 12px 24px;
+    border-top: 1px solid #f1f5f9;
+    text-align: right;
+  }
+  .btn-save {
+    background: var(--blue);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  @media (max-width: 900px) {
+    .view-grid {
+      grid-template-columns: 1fr;
+    }
+    .view-right {
+      border-left: none;
+      border-top: 1px solid #eef2f7;
+    }
+  }
+</style>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="filter-group">
+    <label>Kategori:</label>
+    <select id="filterKategori">
+      <option value="semua">Semua</option>
+      <option value="Artikel">Artikel</option>
+      <option value="Berita">Berita</option>
+      <option value="Panduan">Panduan</option>
+    </select>
+
+    <label>Status:</label>
+    <select id="filterStatus">
+      <option value="semua">Semua</option>
+      <option value="Draft">Draft</option>
+      <option value="Publik">Publik</option>
+      <option value="Arsip">Arsip</option>
+    </select>
+
+    <div class="search-wrapper">
+      <i>🔍</i>
+      <input
+        id="searchInput"
+        class="search-input"
+        placeholder="Cari judul atau isi..."
+      />
+    </div>
+  </div>
+
+  <button class="btn-add" id="btnAdd">＋ Tambah Konten</button>
+</div>
+
+<!-- TABLE -->
+<table>
+  <thead>
+    <tr>
+      <th>Judul</th>
+      <th>Tanggal</th>
+      <th>Penulis</th>
+      <th>Kategori</th>
+      <th>Status</th>
+      <th>Aksi</th>
+    </tr>
+  </thead>
+  <tbody id="kontenBody"></tbody>
+</table>
+
+<!-- VIEW (FULLSCREEN) -->
+<div id="modalLihat" class="modal" aria-hidden="true">
+  <div
+    class="modal-panel modal-panel-view modal-panel modal-panel"
+    style="position: relative"
+  >
+    <button class="modal-close" id="closeView" title="Tutup">✕</button>
+    <div class="modal-panel modal-panel-inner modal-panel">
+      <div class="view-grid">
+        <div class="view-left">
+          <h1 id="lihatJudul" class="view-title">Judul</h1>
+          <div id="lihatMeta" class="view-meta">
+            Tanggal • Penulis • Kategori
+          </div>
+          <div id="viewMedia" class="view-media"></div>
+          <div id="lihatIsi" class="view-body"></div>
+        </div>
+
+        <aside class="view-right">
+          <h3 style="margin-top: 0; color: #1e3a8a">Informasi</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Kategori</span>
+              <div id="infoKategori" class="info-value">—</div>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Penulis</span>
+              <div id="infoPenulis" class="info-value">—</div>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Status</span>
+              <div id="infoStatus" class="info-value">—</div>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Tanggal Publikasi</span>
+              <div id="infoTanggal" class="info-value">—</div>
+            </div>
+            <div class="info-item" style="grid-column: 1/-1">
+              <span class="info-label">Terakhir Diperbarui</span>
+              <div id="infoUpdated" class="info-value">—</div>
+            </div>
+            <div class="info-item" style="grid-column: 1/-1">
+              <span class="info-label">Media</span>
+              <div id="infoMediaLink" class="info-value">
+                <a id="infoMediaAnchor" href="#" target="_blank" rel="noopener"
+                  >—</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 18px; text-align: right">
+            <button class="icon-btn edit" id="viewEditBtn" title="Edit">
+              ✏️
+            </button>
+            <button class="icon-btn del" id="viewDeleteBtn" title="Hapus">
+              🗑️
+            </button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FORM (ADD / EDIT) -->
+<div id="modalForm" class="modal" aria-hidden="true">
+  <div class="modal-panel" style="position: relative">
+    <button class="modal-close" id="closeForm" title="Tutup">✕</button>
+
+    <div class="form-body">
+      <h2 id="formTitle">Tambah Konten</h2>
+
+      <div class="form-row">
+        <div class="form-col">
+          <div class="form-group">
+            <label for="judulInput">Judul</label>
+            <input
+              id="judulInput"
+              type="text"
+              placeholder="Masukkan judul..."
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="penulisInput">Penulis</label>
+            <input
+              id="penulisInput"
+              type="text"
+              placeholder="Nama penulis..."
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="tanggalInput">Tanggal Publikasi</label>
+            <input id="tanggalInput" type="date" />
+          </div>
+
+          <div class="form-group">
+            <label for="kategoriInput">Kategori</label>
+            <select id="kategoriInput">
+              <option>Artikel</option>
+              <option>Berita</option>
+              <option>Panduan</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="statusInput">Status</label>
+            <select id="statusInput">
+              <option>Draft</option>
+              <option>Publik</option>
+              <option>Arsip</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-col" style="min-width: 220px">
+          <div class="form-group">
+            <label for="urlInput"
+              >URL Media (gambar / pdf / youtube / link)</label
+            >
+            <input id="urlInput" type="url" placeholder="https://..." />
+          </div>
+
+          <div
+            style="
+              display: flex;
+              gap: 12px;
+              align-items: center;
+              margin-bottom: 12px;
+            "
+          >
+            <img id="previewThumb" class="img-preview" src="" alt="Preview" />
+            <div style="font-size: 13px; color: var(--muted)">
+              Preview otomatis sesuai tipe media
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="isiInput">Isi Konten</label>
+        <textarea id="isiInput" placeholder="Tulis isi konten..."></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-save" id="btnSave">💾 Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = "kelola_konten_local_v2";
+  let articles = [];
+  let editingId = null;
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) articles = JSON.parse(raw);
+      else {
+        articles = [
+          {
+            id: Date.now(),
+            title: "Keindahan Alam Tropis",
+            date: "2025-11-08",
+            author: "Admin",
+            category: "Artikel",
+            status: "Publik",
+            image: "https://......",
+            content:
+              "Artikel tentang keindahan alam tropis.\nMenjelajahi hutan dan pantai.",
+            lastUpdated: new Date().toISOString(),
+          },
+        ];
+        save();
+      }
+    } catch (e) {
+      console.error(e);
+      articles = [];
+    }
+  }
+  function save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(articles));
+  }
+
+  // ---------- render table optimisasi ----------
+  const tbody = document.getElementById("kontenBody");
+  function renderTable() {
+    tbody.innerHTML = "";
+    const filterCat = document.getElementById("filterKategori").value;
+    const filterStatus = document.getElementById("filterStatus").value;
+    const search = document
+      .getElementById("searchInput")
+      .value.trim()
+      .toLowerCase();
+
+    const filtered = articles.filter((a) => {
+      const matchCat = filterCat === "semua" || a.category === filterCat;
+      const matchStatus = filterStatus === "semua" || a.status === filterStatus;
+      const matchSearch =
+        a.title.toLowerCase().includes(search) ||
+        (a.content || "").toLowerCase().includes(search);
+      return matchCat && matchStatus && matchSearch;
+    });
+
+    if (filtered.length === 0) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td colspan="6" style="text-align:center; padding:20px; color:var(--muted)">Tidak ada konten</td>`;
+      tbody.appendChild(tr);
+      return;
+    }
+
+    const frag = document.createDocumentFragment();
+    filtered.forEach((a) => {
+      const tr = document.createElement("tr");
+      const dateDisp = a.date
+        ? new Date(a.date).toLocaleDateString("id-ID", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })
+        : "";
+      tr.innerHTML = `
+        <td style="max-width:360px;">${escapeHtml(a.title)}</td>
+        <td>${escapeHtml(dateDisp)}</td>
+        <td>${escapeHtml(a.author || "—")}</td>
+        <td>${escapeHtml(a.category)}</td>
+        <td>${escapeHtml(a.status)}</td>
+        <td>
+          <div class="aksi" data-id="${a.id}">
+            <button class="icon-btn view" title="Lihat">👁️</button>
+            <button class="icon-btn edit" title="Edit">✏️</button>
+            <button class="icon-btn del" title="Hapus">🗑️</button>
+          </div>
+        </td>`;
+      frag.appendChild(tr);
+    });
+    tbody.appendChild(frag);
+  }
+
+  function escapeHtml(s = "") {
+    return String(s).replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        }[c])
+    );
+  }
+
+  // ---------- modal helpers ----------
+  const modalForm = document.getElementById("modalForm");
+  const modalLihat = document.getElementById("modalLihat");
+
+  function showModal(el) {
+    el.style.display = "flex";
+    el.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    const focusable = el.querySelector("input, button, select, textarea");
+    if (focusable) focusable.focus();
+  }
+  function hideModal(el) {
+    el.style.display = "none";
+    el.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "auto";
+    if (el === modalForm) {
+      editingId = null;
+      f_title.value = "";
+      f_author.value = "";
+      f_date.value = new Date().toISOString().split("T")[0];
+      f_url.value = "";
+      f_preview.src = "";
+      f_kategori.value = "Artikel";
+      f_status.value = "Draft";
+      f_isi.value = "";
+    }
+  }
+
+  document
+    .querySelectorAll(".modal-close")
+    .forEach((btn) =>
+      btn.addEventListener("click", () => hideModal(btn.closest(".modal")))
+    );
+  document.querySelectorAll(".modal").forEach((ov) =>
+    ov.addEventListener("click", (e) => {
+      if (e.target === ov) hideModal(ov);
+    })
+  );
+
+  function detectMedia(url) {
+    if (!url) return "";
+    if (url.match(/\.(jpeg|jpg|png|gif|webp)$/i))
+      return `<img src="${url}" alt="media">`;
+    if (url.match(/youtube\.com\/watch\?v=([^\s&]+)/))
+      return `<iframe src="https:....." frameborder="0" allowfullscreen style="height:200px;width:100%;border-radius:8px;"></iframe>`;
+    return `<a href="${url}" target="_blank">${url}</a>`;
+  }
+
+  // ---------- form controls ----------
+  const f_title = document.getElementById("judulInput");
+  const f_author = document.getElementById("penulisInput");
+  const f_date = document.getElementById("tanggalInput");
+  const f_url = document.getElementById("urlInput");
+  const f_preview = document.getElementById("previewThumb");
+  const f_kategori = document.getElementById("kategoriInput");
+  const f_status = document.getElementById("statusInput");
+  const f_isi = document.getElementById("isiInput");
+
+  f_url.addEventListener("input", () => (f_preview.src = f_url.value));
+
+  document.getElementById("btnAdd").addEventListener("click", () => {
+    document.getElementById("formTitle").innerText = "Tambah Konten";
+    showModal(modalForm);
+  });
+
+  document.getElementById("btnSave").addEventListener("click", () => {
+    const data = {
+      id: editingId || Date.now(),
+      title: f_title.value.trim(),
+      date: f_date.value,
+      author: f_author.value.trim(),
+      category: f_kategori.value,
+      status: f_status.value,
+      image: f_url.value.trim(),
+      content: f_isi.value.trim(),
+      lastUpdated: new Date().toISOString(),
+    };
+    if (!data.title) {
+      alert("Judul wajib diisi");
+      return;
+    }
+    if (editingId) {
+      articles = articles.map((a) => (a.id === editingId ? data : a));
+    } else articles.push(data);
+    save();
+    renderTable();
+    hideModal(modalForm);
+  });
+
+  // ---------- table actions ----------
+  tbody.addEventListener("click", (e) => {
+    const aksi = e.target.closest(".aksi");
+    if (!aksi) return;
+    const id = Number(aksi.dataset.id);
+    const artikel = articles.find((a) => a.id === id);
+    if (e.target.classList.contains("view")) {
+      document.getElementById("lihatJudul").innerText = artikel.title;
+      document.getElementById("lihatMeta").innerText = `${new Date(
+        artikel.date
+      ).toLocaleDateString("id-ID")} • ${artikel.author} • ${artikel.category}`;
+      document.getElementById("lihatIsi").innerText = artikel.content;
+      document.getElementById("viewMedia").innerHTML = detectMedia(
+        artikel.image
+      );
+      document.getElementById("infoKategori").innerText = artikel.category;
+      document.getElementById("infoPenulis").innerText = artikel.author;
+      document.getElementById("infoStatus").innerText = artikel.status;
+      document.getElementById("infoTanggal").innerText = artikel.date;
+      document.getElementById("infoUpdated").innerText = new Date(
+        artikel.lastUpdated
+      ).toLocaleString("id-ID");
+      document.getElementById("infoMediaAnchor").href = artikel.image;
+      showModal(modalLihat);
+    } else if (e.target.classList.contains("edit")) {
+      editingId = id;
+      f_title.value = artikel.title;
+      f_author.value = artikel.author;
+      f_date.value = artikel.date;
+      f_url.value = artikel.image;
+      f_preview.src = artikel.image;
+      f_kategori.value = artikel.category;
+      f_status.value = artikel.status;
+      f_isi.value = artikel.content;
+      document.getElementById("formTitle").innerText = "Edit Konten";
+      showModal(modalForm);
+    } else if (e.target.classList.contains("del")) {
+      if (confirm("Yakin ingin menghapus konten ini?")) {
+        articles = articles.filter((a) => a.id !== id);
+        save();
+        renderTable();
+      }
+    }
+  });
+  
+
+  document
+    .getElementById("filterKategori")
+    .addEventListener("change", renderTable);
+  document
+    .getElementById("filterStatus")
+    .addEventListener("change", renderTable);
+  document.getElementById("searchInput").addEventListener("input", renderTable);
+
+  load();
+  renderTable();
+</script>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pilih Peran - Ruang Dengar</title>
+    <style>
+      /* Salin CSS dari file registrasi/login Anda untuk konsistensi */
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .container {
+        display: flex;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        max-width: 900px;
+        width: 100%;
+        overflow: hidden;
+      }
+      .form-container {
+        flex: 1;
+        padding: 50px;
+      }
+      /* Branding (kanan) */
+      .branding-container {
+        flex: 0 0 40%;
+        background-color: #3a307b;
+        color: white;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+      .branding-container h1 {
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+      .branding-container p {
+        font-size: 16px;
+        margin-bottom: 30px;
+      }
+      .branding-image {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-top: 20px;
+      }
+
+      /* --- Style Khusus Halaman Ini --- */
+      .role-selection-header h2 {
+        font-size: 16px;
+        color: #888;
+        font-weight: 500;
+        margin-bottom: 10px;
+      }
+      .role-selection-header h3 {
+        font-size: 26px;
+        color: #333;
+        font-weight: 700;
+        margin-top: 0;
+        margin-bottom: 40px;
+      }
+      .role-options {
+        display: flex;
+        gap: 20px;
+      }
+      .role-card {
+        flex: 1;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.3s ease;
+      }
+      .role-card:hover {
+        border-color: #6a5acd;
+        box-shadow: 0 5px 15px rgba(106, 90, 205, 0.1);
+        transform: translateY(-5px);
+      }
+      .role-card-icon {
+        font-size: 32px;
+        color: #6a5acd;
+        margin-bottom: 15px;
+      }
+      .role-card h4 {
+        margin: 0 0 10px 0;
+        font-size: 18px;
+      }
+      .role-card p {
+        margin: 0;
+        font-size: 13px;
+        color: #777;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="form-container">
+        <div class="role-selection-header">
+          <h2>Role Selection</h2>
+          <h3>Silakan pilih peran Anda untuk melanjutkan.</h3>
+        </div>
+
+        <div class="role-options">
+          <a href="{% url 'register_user' %}" class="role-card">
+            <div class="role-card-icon">👤</div>
+            <h4>Pengguna</h4>
+            <p>Akses fitur standar aplikasi dan kelola profil pribadi Anda.</p>
+          </a>
+
+          <a href="{% url 'register_admin' %}" class="role-card">
+            <div class="role-card-icon">⚙️</div>
+            <h4>Admin</h4>
+            <p>
+              Kelola sistem, pengguna, dan konfigurasi aplikasi secara penuh.
+            </p>
+          </a>
+        </div>
+      </div>
+
+      <div class="branding-container">
+        <h1>Ruang Dengar</h1>
+        <p>Platform Digital Aman</p>
+        <img
+          src="{% static 'images/cewe.png' %}"
+          alt="Ilustrasi Ruang Dengar"
+          class="branding-image"
+        />
+      </div>
+    </div>
+  </body>
+</html>
